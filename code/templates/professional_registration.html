@@ -1,0 +1,51 @@
+{% extends 'base_registration.html' %}
+
+{% block title %}
+    <h3 class="text-center display-4 my-4">MadyPro Professionals Registration Page</h3>
+{% endblock %}
+
+{% block form %}
+
+    <div class="container mt-5">
+        <div class="row justify-content-center">
+            <div class="col-md-6">
+                <form action="{{ url_for('professional_register') }}" method="POST">
+
+                    <!-- Professional Name -->
+                    <div class="mb-3">
+                      <label for="professionalName" class="form-label">Your Name</label>
+                      <input type="text" class="form-control" id="professionalName" name="professionalName" aria-describedby="nameHelp" required>
+                      
+                      <div id="nameHelp" class="form-text">Please enter your full name here.</div>
+                    </div>
+
+                    <!-- Professional Email -->
+                    <div class="mb-3">
+                        <label for="professionalEmail" class="form-label">Email address</label>
+                        <input type="email" class="form-control" id="professionalEmail" name="professionalEmail" required>
+                        <div id="emailHelp" class="form-text">This email will be required for login.</div>
+                    </div>
+
+                    <!-- Professional Password -->
+                    <div class="mb-3">
+                        <label for="professionalPassword" class="form-label">Password</label>
+                        <input type="password" class="form-control" id="professionalPassword" name="professionalPassword" required>
+                    </div>
+
+                    <!-- Professional Service Category -->
+                    <div class="mb-3">
+                        <label for="professionalService" class="form-label">Your Service</label>
+                        <select class="form-select" id="professionalService" name="professionalService" required>
+                            {% for service in services %}
+                                <option value="{{ service.id }}">{{ service.name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary">Submit</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+{% endblock %}

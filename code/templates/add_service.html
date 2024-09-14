@@ -1,0 +1,47 @@
+{% extends 'admin.html' %}
+
+{% block content %}
+
+    <div class="container mt-4">
+        <div class="row justify-content-center">
+            <div class="col-md-6">
+                <form action="{{ url_for('add_service') }}" method="POST">
+
+                    <!-- Service Name -->
+                    <div class="mb-3">
+                      <label for="serviceName" class="form-label">Service Name</label>
+                      <input type="text" class="form-control" id="serviceName" name="serviceName" aria-describedby="serviceHelp" required>
+                      
+                      <div id="serviceHelp" class="form-text">The service name must be unique</div>
+                    </div>
+
+                    <!-- Service Price -->
+                    <div class="mb-3">
+                        <label for="servicePrice" class="form-label">Service Price</label>
+                        <input type="number" class="form-control" id="servicePrice" name="servicePrice" min="10" step="10" required>
+                    </div>
+
+                    <!-- Service Category -->
+                    <div class="mb-3">
+                        <label for="serviceCategory" class="form-label">Service Category</label>
+                        <select class="form-select" id="serviceCategory" name="serviceCategory" required>
+                            {% for category in categories %}
+                                <option value="{{ category.id }}">{{ category.name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    
+
+                    <div class="mb-3">
+                        <label for="serviceDescription" class="form-label">Service Description</label>
+                        <textarea class="form-control" id="serviceDescription" name="serviceDescription" rows="3" required></textarea>
+                        <div id="serviceHelp" class="form-text">Tell the customers more about this service</div>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary">Submit</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+{% endblock %}
