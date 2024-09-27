@@ -30,6 +30,7 @@
                 <th scope="col">Email</th>
                 <th scope="col">Service</th>
                 <th scope="col">Status</th>
+                <th scope="col">Actions</th>
             </tr>
         </thead>
 
@@ -42,22 +43,24 @@
                     <td>{{ professional.service.name }}</td>
                     <td>{{ professional.status }}</td>
                     <td>
-                        {% if professional.status == "Pending" %}
-                            <form action="{{ url_for('activate_professional', professional_id=professional.id) }}" method="POST">
-                                <button type="submit" class="btn btn-success">Activate</button>
+                        <div class="d-inline">
+                            {% if professional.status == "Pending" %}
+                                <form action="{{ url_for('activate_professional', professional_id=professional.id) }}" method="POST" class="d-inline">
+                                    <button type="submit" class="btn btn-success">Activate</button>
+                                </form>
+                            {% elif professional.status == "Active" %}
+                                <form action="{{ url_for('deactivate_professional', professional_id=professional.id) }}" method="POST" class="d-inline">
+                                    <button type="submit" class="btn btn-warning">Deactivate</button>
+                                </form>
+                            {% elif professional.status == "InActive" %}
+                                <form action="{{ url_for('activate_professional', professional_id=professional.id) }}" method="POST" class="d-inline">
+                                    <button type="submit" class="btn btn-success">Activate</button>
+                                </form>
+                            {% endif %}
+                            <form action="{{ url_for('delete_professional', professional_id=professional.id) }}" method="POST" class="d-inline">
+                                <button type="submit" class="btn btn-danger">Delete</button>
                             </form>
-                        {% elif professional.status == "Active" %}
-                            <form action="{{ url_for('deactivate_professional', professional_id=professional.id) }}" method="POST" style="display:inline;">
-                                <button type="submit" class="btn btn-warning">Deactivate</button>
-                            </form>
-                        {% elif professional.status == "InActive" %}
-                            <form action="{{ url_for('activate_professional', professional_id=professional.id) }}" method="POST" style="display:inline;">
-                                <button type="submit" class="btn btn-success">Activate</button>
-                            </form>
-                        {% endif %}
-                        <form action="{{ url_for('delete_professional', professional_id=professional.id) }}" method="POST" style="display:inline;">
-                            <button type="submit" class="btn btn-danger">Delete</button>
-                        </form>
+                        </div>
                     </td>
                 </tr>
 

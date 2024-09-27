@@ -1,8 +1,10 @@
 from flask import render_template, request, redirect, url_for, flash
 from flask_login import login_user, logout_user, current_user, login_required
 from werkzeug.security import check_password_hash
+from functools import wraps
 from app import app, db, login_manager
-from app.models import Category, Service, ServiceRequest, Customer, Professional
+from app.models import Category, Service, ServiceRequest, Customer, Professional, Admin
+
 
 @login_manager.user_loader
 def load_user(user_id):
@@ -10,30 +12,83 @@ def load_user(user_id):
         return db.session.get(Professional, int(user_id[2:]))
     elif user_id.startswith('c_'):
         return db.session.get(Customer, int(user_id[2:]))
+    elif user_id.startswith('a_'):
+        return db.session.get(Admin, int(user_id[2:]))
     return None 
+
+def admin_login_required(f):
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        if not current_user.is_authenticated:
+            flash('Please Log In With Admin Credentials', 'warning')
+            return redirect(url_for('admin_login'))
+
+        if not current_user.get_id().startswith('a_'):
+            flash('Access Denied! You Are Not Allowed To Access This Page', 'danger')
+            return redirect(url_for('home'))
+        
+        return f(*args, **kwargs)
+    return decorated_function
+
+
+def professional_login_required(f):
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        if not current_user.is_authenticated:
+            flash('Please Log As A Professional To Continue', 'warning')
+            return redirect(url_for('professional_login'))
+
+        if not current_user.get_id().startswith('p_'):
+            flash('Access Denied! You Are Not Allowed To Access This Page', 'danger')
+            return redirect(url_for('home'))
+        
+        return f(*args, **kwargs)
+    return decorated_function
+
+
+# --------------- --  Admin Routes -------- ---------------------------------------
+
+@app.route("/admin-login", methods=["GET", "POST"])
+def admin_login():
+    if request.method == "POST":
+        email = request.form.get("typeEmail")
+        password = request.form.get('typePassword')
+        admin = Admin.query.filter_by(email=email).first()
+        if admin and check_password_hash(admin.password, password):
+            login_user(admin)
+            flash("You are now logged in!", "success")
+            return redirect(url_for('admin_home'))   
+        flash("Wrong Admin Email or Password", 'danger')  
+    return render_template('login.html', usertype="admin")
 
 
 @app.route("/admin")
+@admin_login_required
 def admin_home():
     return render_template("admin.html")
 
+
 @app.route("/admin/services")
+@admin_login_required
 def admin_services():
     all_services = Service.query.all()
     return render_template("services_admin.html", services=all_services)
 
 
 @app.route("/admin/professionals")
+@admin_login_required
 def admin_professionals():
     all_professionals = Professional.query.all()
     return render_template("professionals_admin.html", professionals=all_professionals)
 
 @app.route('/admin/customers')
+@admin_login_required
 def admin_customers():
     all_customers = Customer.query.all()
     return render_template("customers_admin.html", customers=all_customers)
 
 @app.route('/admin/activate/<int:professional_id>', methods=['POST'])
+@admin_login_required
 def activate_professional(professional_id):
     professional = Professional.query.get_or_404(professional_id)
     professional.status = "Active"
@@ -41,6 +96,7 @@ def activate_professional(professional_id):
     return redirect(url_for('admin_professionals'))
 
 @app.route('/admin/deactivate/<int:professional_id>', methods=['POST'])
+@admin_login_required
 def deactivate_professional(professional_id):
     professional = Professional.query.get_or_404(professional_id)
     professional.status = "InActive"
@@ -48,6 +104,7 @@ def deactivate_professional(professional_id):
     return redirect(url_for('admin_professionals'))
 
 @app.route('/admin/delete/<int:professional_id>', methods=['POST'])
+@admin_login_required
 def delete_professional(professional_id):
     professional = Professional.query.get_or_404(professional_id)
     db.session.delete(professional)
@@ -55,6 +112,7 @@ def delete_professional(professional_id):
     return redirect(url_for('admin_professionals'))
 
 @app.route("/admin/categories/add_category", methods=["GET", "POST"])
+@admin_login_required
 def add_category():
     if request.method == "POST":
         category_name = request.form["category_name"]
@@ -73,6 +131,7 @@ def add_category():
     return render_template("add_category.html")
 
 @app.route("/admin/services/add_service", methods=['GET', 'POST'])
+@admin_login_required
 def add_service():
     all_categories = Category.query.all()
     if request.method == "POST":
@@ -97,7 +156,8 @@ def add_service():
             return redirect(url_for('admin_services'))
             
     return render_template("add_service.html", categories=all_categories)
-    
+
+#  -----------------------------------------------------------------------------------   
 
 
 
@@ -105,7 +165,9 @@ def add_service():
 def home():
     print(current_user)
     return render_template("base.html")
-    
+
+
+#  ---------------------------- Service Routes --------------------------------------
 @app.route("/services")
 def services():
     all_services = Service.query.all()
@@ -116,25 +178,96 @@ def services():
 def get_professionals_of_service(service_id):
     service = Service.query.filter_by(id=service_id).first()
     if service:
-        desired_professionals = service.professionals
+        desired_professionals = Professional.query.filter_by(service_id=service.id, status="Active").all()
         if desired_professionals:
-            return render_template("get_professionals_of_service.html", desired_professionals=desired_professionals)
+            return render_template("get_professionals_of_service.html", desired_professionals=desired_professionals, service=service)
+        flash('Currently, no professionals are available for this service', 'info')
+        return redirect(url_for('services'))
     return redirect(url_for('home'))
 
 
 @app.route("/services/<int:service_id>/professionals/<int:professional_id>/create")
+@login_required
 def create_service_request(service_id, professional_id):
-    service = Service.query.filter_by(id=service_id).first()
-    professional = Professional.query.filter_by(id=professional_id).first()
-    if service and professional:
-        service_request = ServiceRequest(service_id=service_id, customer_id=current_user["id"], professional_id=professional_id)
-        print(service_request)
-        return None
-    return None
+    if current_user.get_id().startswith('c_'):
+        service = Service.query.filter_by(id=service_id).first()
+        professional = Professional.query.filter_by(id=professional_id).first()
+        if service and professional:
+            service_request = ServiceRequest(service_id=service_id, customer_id=int(current_user.get_id()[2:]), professional_id=professional_id)
+            db.session.add(service_request)
+            db.session.commit()
+            flash(f'Your request has been created with Professional {professional.name}.\n Let the professional accept your service request 😀', 'success')
+            return redirect(url_for('services'))
+        return redirect(url_for('home'))
+    flash('Please login as a customer to book a service', 'danger')
+    return redirect(url_for('home'))
+    
+
+# ----------------- Category Route -------------------------------------
+@app.route('/categories')
+def categories():
+    categories = Category.query.all()
+    return render_template('categories.html', categories=categories) 
+
+@app.route('/categories/<int:category_id>/services')
+def get_services_of_category(category_id):
+    category = Category.query.filter_by(id=category_id).first()
+    if category:
+        available_services = category.services
+        if available_services:
+            return render_template('services.html', services=available_services, category=category.name)
+        flash("Currently, no service is available under this category", 'info')
+        return redirect(url_for('categories'))
+    return redirect(url_for('home'))
+    
+
+# ------------------------ Professional Routes --------------------------------
+
+
+@app.route('/professional-dashboard')
+@professional_login_required
+def professional_dashboard():
+    prof_id = int(current_user.get_id()[2:])
+    professional = Professional.query.filter_by(id=prof_id).first()
+    return render_template('professionals_dashboard.html', professional = professional, 
+                           service_requests = professional.service_requests)
+
+
+@app.route('/professional-dashboard/accept/<int:request_id>', methods=["POST"])
+@professional_login_required
+def accept_request(request_id):
+    service_request = ServiceRequest.query.filter_by(id = request_id).first()
+    if service_request:
+        service_request.status = "Accepted"
+        db.session.commit()
+        return redirect(url_for('professional_dashboard'))
+    flash('No Service Request Found With The Given Request ID', 'danger')
+    return redirect(url_for('home'))
+    
+@app.route('/professional-dashboard/reject/<int:request_id>', methods=["POST"])
+@professional_login_required
+def reject_request(request_id):
+    service_request = ServiceRequest.query.filter_by(id = request_id).first()
+    if service_request:
+        service_request.status = "Rejected"
+        db.session.commit()
+        return redirect(url_for('professional_dashboard'))
+    flash('No Service Request Found With The Given Request ID', 'danger')
+    return redirect(url_for('home'))
     
 
 
+# ------------------------ Customer Routes -----------------------------------
 
+@app.route('/customer-dashboard')
+@login_required
+def customer_dashbaord():
+    cust_id = int(current_user.get_id()[2:])
+    customer = Customer.query.filter_by(id=cust_id).first()
+    return render_template('customer_dashboard.html', customer=customer)
+
+        
+#  ------------------------ Registration Routes ----------------------------------
 @app.route('/professional-register', methods=['GET', 'POST'])
 def professional_register():
     if request.method == 'POST':
@@ -145,7 +278,7 @@ def professional_register():
 
         existing_professional = Professional.query.filter_by(email=email).first()
         if existing_professional:
-            flash('Email already registered. Please use different email address.', 'danger')
+            flash('Email Already Registered. Please Use A Different Email Address.', 'danger')
             return redirect(url_for('professional_register'))
 
 
@@ -155,12 +288,12 @@ def professional_register():
         db.session.add(new_professional)
         db.session.commit()
 
-        flash('Great! Your details has been passed to the admin. You may start providing your service post verfication of details.', 'success')
+        flash('Great! Your Details Has Been Passed To The Admin. You May Start Providing Your Service Post Verfication Of Details.', 'success')
         return redirect(url_for('home'))
 
-    # Fetch services to populate the dropdown
     all_services = Service.query.all()
     return render_template('professional_registration.html', services=all_services)
+
 
 @app.route("/customer-register", methods=["GET", "POST"])
 def customer_register():
@@ -186,16 +319,16 @@ def customer_register():
     return render_template('customer_registration.html')
 
 
+#  ------------------------ Login Routes ----------------------------------------
+
 @app.route("/professional-login", methods=["GET", "POST"])
 def professional_login():
     if request.method == "POST":
         email = request.form.get("typeEmail")
-        password = request.form.get('typeEmail')
-        
+        password = request.form.get('typePassword')
         professional = Professional.query.filter_by(email=email).first()
         if professional and check_password_hash(professional.password, password):
             login_user(professional)
-            
             flash("You are now logged in!", "success")
             return redirect(url_for('home'))     
     return render_template('login.html', usertype="professional")
@@ -207,13 +340,15 @@ def customer_login():
         email = request.form.get("typeEmail")
         password = request.form.get('typePassword')
         
-        customer = db.session.query(Customer).filter(Customer.email == email).first()
+        customer = Customer.query.filter_by(email=email).first()
         if customer and check_password_hash(customer.password, password):
             login_user(customer)
             flash("You are now logged in!", "success")
             return redirect(url_for('home'))     
     return render_template('login.html', usertype="customer")
 
+
+#  ------------------ LogOut Route --------------------------------------
 @app.route('/logout')
 @login_required
 def logout():

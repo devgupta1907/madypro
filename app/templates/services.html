@@ -4,6 +4,19 @@
 {% block content %}
 
     <div class="container mt-4">
+        <h3 class="text-center display-5 my-2">MadyPro Services</h3>
+        <div class="row">
+            <div class="text-center">
+                <p class="lead">Get Our Range of Services At Best Price, And Exclusive Professionals</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="container mt-4">
+        {% if not category %}
+            {% set category = "All" %}
+        {% endif %}
+        <p class="lead">- found <b>{{ services|length }}</b> service(s) in <b>{{ category }}</b></p>
         <div class="row">
             {% for service in services %}
             <!-- Card 1 -->
