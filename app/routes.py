@@ -1,49 +1,10 @@
 from flask import render_template, request, redirect, url_for, flash
 from flask_login import login_user, logout_user, current_user, login_required
 from werkzeug.security import check_password_hash
-from functools import wraps
 from app import app, db, login_manager
+from app.utility import admin_login_required, professional_login_required, customer_login_required
 from app.models import Category, Service, ServiceRequest, Customer, Professional, Admin
 
-
-@login_manager.user_loader
-def load_user(user_id):
-    if user_id.startswith('p_'):
-        return db.session.get(Professional, int(user_id[2:]))
-    elif user_id.startswith('c_'):
-        return db.session.get(Customer, int(user_id[2:]))
-    elif user_id.startswith('a_'):
-        return db.session.get(Admin, int(user_id[2:]))
-    return None 
-
-def admin_login_required(f):
-    @wraps(f)
-    def decorated_function(*args, **kwargs):
-        if not current_user.is_authenticated:
-            flash('Please Log In With Admin Credentials', 'warning')
-            return redirect(url_for('admin_login'))
-
-        if not current_user.get_id().startswith('a_'):
-            flash('Access Denied! You Are Not Allowed To Access This Page', 'danger')
-            return redirect(url_for('home'))
-        
-        return f(*args, **kwargs)
-    return decorated_function
-
-
-def professional_login_required(f):
-    @wraps(f)
-    def decorated_function(*args, **kwargs):
-        if not current_user.is_authenticated:
-            flash('Please Log As A Professional To Continue', 'warning')
-            return redirect(url_for('professional_login'))
-
-        if not current_user.get_id().startswith('p_'):
-            flash('Access Denied! You Are Not Allowed To Access This Page', 'danger')
-            return redirect(url_for('home'))
-        
-        return f(*args, **kwargs)
-    return decorated_function
 
 
 # --------------- --  Admin Routes -------- ---------------------------------------
@@ -81,11 +42,13 @@ def admin_professionals():
     all_professionals = Professional.query.all()
     return render_template("professionals_admin.html", professionals=all_professionals)
 
+
 @app.route('/admin/customers')
 @admin_login_required
 def admin_customers():
     all_customers = Customer.query.all()
     return render_template("customers_admin.html", customers=all_customers)
+
 
 @app.route('/admin/activate/<int:professional_id>', methods=['POST'])
 @admin_login_required
@@ -95,6 +58,7 @@ def activate_professional(professional_id):
     db.session.commit()
     return redirect(url_for('admin_professionals'))
 
+
 @app.route('/admin/deactivate/<int:professional_id>', methods=['POST'])
 @admin_login_required
 def deactivate_professional(professional_id):
@@ -103,6 +67,7 @@ def deactivate_professional(professional_id):
     db.session.commit()
     return redirect(url_for('admin_professionals'))
 
+
 @app.route('/admin/delete/<int:professional_id>', methods=['POST'])
 @admin_login_required
 def delete_professional(professional_id):
@@ -110,6 +75,7 @@ def delete_professional(professional_id):
     db.session.delete(professional)
     db.session.commit()
     return redirect(url_for('admin_professionals'))
+
 
 @app.route("/admin/categories/add_category", methods=["GET", "POST"])
 @admin_login_required
@@ -129,6 +95,7 @@ def add_category():
             flash(f'Error adding category: {str(e)}', 'danger')
             return redirect(url_for('admin_services'))
     return render_template("add_category.html")
+
 
 @app.route("/admin/services/add_service", methods=['GET', 'POST'])
 @admin_login_required
@@ -157,17 +124,17 @@ def add_service():
             
     return render_template("add_service.html", categories=all_categories)
 
-#  -----------------------------------------------------------------------------------   
 
+#  -----------------------------------------------------------------------------------   
 
 
 @app.route("/")
 def home():
-    print(current_user)
     return render_template("base.html")
 
 
 #  ---------------------------- Service Routes --------------------------------------
+
 @app.route("/services")
 def services():
     all_services = Service.query.all()
@@ -204,10 +171,12 @@ def create_service_request(service_id, professional_id):
     
 
 # ----------------- Category Route -------------------------------------
+
 @app.route('/categories')
 def categories():
     categories = Category.query.all()
     return render_template('categories.html', categories=categories) 
+
 
 @app.route('/categories/<int:category_id>/services')
 def get_services_of_category(category_id):
@@ -243,6 +212,7 @@ def accept_request(request_id):
         return redirect(url_for('professional_dashboard'))
     flash('No Service Request Found With The Given Request ID', 'danger')
     return redirect(url_for('home'))
+  
     
 @app.route('/professional-dashboard/reject/<int:request_id>', methods=["POST"])
 @professional_login_required
@@ -253,21 +223,21 @@ def reject_request(request_id):
         db.session.commit()
         return redirect(url_for('professional_dashboard'))
     flash('No Service Request Found With The Given Request ID', 'danger')
-    return redirect(url_for('home'))
-    
+    return redirect(url_for('home')) 
 
 
 # ------------------------ Customer Routes -----------------------------------
 
 @app.route('/customer-dashboard')
-@login_required
-def customer_dashbaord():
+@customer_login_required
+def customer_dashboard():
     cust_id = int(current_user.get_id()[2:])
     customer = Customer.query.filter_by(id=cust_id).first()
-    return render_template('customer_dashboard.html', customer=customer)
+    return render_template('customer_dashboard.html', customer=customer, service_requests=customer.service_requests)
 
         
 #  ------------------------ Registration Routes ----------------------------------
+
 @app.route('/professional-register', methods=['GET', 'POST'])
 def professional_register():
     if request.method == 'POST':
@@ -349,6 +319,7 @@ def customer_login():
 
 
 #  ------------------ LogOut Route --------------------------------------
+
 @app.route('/logout')
 @login_required
 def logout():

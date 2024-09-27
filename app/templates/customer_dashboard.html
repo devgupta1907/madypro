@@ -13,4 +13,60 @@
         </div>
     </div>
 
+    <table class="table table-hover">
+        <thead>
+          <tr>
+            <th scope="col">#</th>
+            <th scope="col">Professional Name</th>
+            <th scope="col">Status</th>
+            <th scope="col">Actions</th>
+          </tr>
+        </thead>
+      
+        <tbody>
+          {% for request in service_requests %}
+          <tr>
+            <th scope="row">{{ request.id }}</th>
+            <td>{{ request.professional.name }}</td>
+            <td>{{ request.status }}</td>
+            <td>
+              <div class="d-inline">
+                {% if request.status == "Requested" %}
+                <!-- Accept button -->
+                  <form
+                      action="{{ url_for('accept_request', request_id=request.id) }}"
+                      method="POST"
+                      class="d-inline">
+                      <button type="submit" class="btn btn-success">Accept</button>
+                  </form>
+      
+                <!-- Reject button -->
+                  <form
+                      action="{{ url_for('reject_request', request_id=request.id) }}"
+                      method="POST"
+                      class="d-inline">
+                      <button type="submit" class="btn btn-danger">Reject</button>
+                  </form>
+      
+                {% elif request.status == "Accepted" %}
+                <!-- Reject button -->
+                  <form
+                      action="{{ url_for('reject_request', request_id=request.id) }}"
+                      method="POST"
+                      class="d-inline">
+                      <button type="submit" class="btn btn-danger">Reject</button>
+                  </form>
+      
+                {% elif request.status == "Rejected" %}
+                <!-- No buttons for rejected status -->
+                    <span>No further actions available</span>
+                {% endif %}
+              </div>
+            </td>
+          </tr>
+      
+          {% endfor %}
+        </tbody>
+      </table>
+
 {% endblock %}
