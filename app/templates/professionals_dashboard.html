@@ -6,7 +6,7 @@
     <div class="text-center">
       <p class="lead">
         {{ professional.service.name }} Professional | 
-		<span class="badge 
+		    <span class="badge 
           {% if professional.status == 'Active' %}
             text-bg-success
           {% elif professional.status == 'Pending' %}
@@ -14,7 +14,16 @@
           {% elif professional.status == 'InActive' %}
             text-bg-danger
           {% endif %}
-        "> {{ professional.status }} </span>
+        "> {{ professional.status }} </span> |
+        <span class="badge 
+          {% if 0 <= professional.rating < 2.6 %}
+            text-bg-danger
+          {% elif 2.6 <= professional.rating < 4.1 %}
+            text-bg-warning
+          {% elif 4.1 <= professional.rating <= 5 %}
+            text-bg-success
+          {% endif %}
+        "> {{ professional.rating }} </span>
       </p>
     </div>
   </div>

@@ -1,0 +1,33 @@
+{% extends 'base.html' %} 
+
+{% block content %}
+
+<div class="container mt-4">
+    <h3 class="text-center display-6 my-2">Service Rating</h3>
+    <div class="row">
+    <div class="text-center">
+        <p class="lead">
+            Please rate the service on a scale of 1 to 5, where 1 means Not Satisfied, and 5 being Highly Satisfied
+        </p>
+    </div>
+    </div>
+</div>
+
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <form action="{{ url_for('close_request', request_id=request_id) }}" method="POST">
+
+                <div class="mb-3">
+                    <label for="rating" class="form-label">Rating</label>
+                    <input type="number" class="form-control" id="rating" name="rating" min="1" max="5" required>
+                    <div id="ratingHelp" class="form-text">Please rate our professional</div>
+                </div>
+                
+                <button type="submit" class="btn btn-primary">Submit</button>
+            </form>
+        </div>
+    </div>
+</div>
+
+{% endblock %}

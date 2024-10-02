@@ -1,3 +1,4 @@
+from sqlalchemy import CheckConstraint
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask_login import UserMixin
 from app import db
@@ -28,6 +29,8 @@ class ServiceRequest(db.Model):
     customer_id = db.Column(db.Integer, db.ForeignKey('customer.id'), nullable=False)
     professional_id = db.Column(db.Integer, db.ForeignKey('professional.id'), nullable=False)
     status = db.Column(db.String, default="Requested")
+    rating = db.Column(db.Integer, CheckConstraint(sqltext='rating >= 1 AND rating <= 5'), nullable=True)
+
     
     def __repr__(self):
         return f"<ServiceRequest {self.id}>"
@@ -70,6 +73,19 @@ class Professional(UserMixin, db.Model):
     
     def __repr__(self):
         return f'<Professional {self.name}>'
+    
+    @property
+    def rating(self):
+        total_services = 0
+        total_ratings = 0
+        for request in self.service_requests:
+            if request.rating is not None: 
+                total_ratings += request.rating
+            total_services += 1
+            
+        if total_services > 0: return total_ratings / total_services
+        return None
+    
     
     def set_password(self, password):
         if password:

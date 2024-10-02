@@ -92,7 +92,7 @@ def add_category():
             return redirect(url_for('admin_services'))
         except Exception as e:
             db.session.rollback()
-            flash(f'Error adding category: {str(e)}', 'danger')
+            flash(f'Error Adding Category. Category Might Already Exists.', 'danger')
             return redirect(url_for('admin_services'))
     return render_template("add_category.html")
 
@@ -115,11 +115,11 @@ def add_service():
         try:
             db.session.add(new_service)
             db.session.commit()
-            flash("Service added successfully!", "success")
+            flash("Service Added Successfully!", "success")
             return redirect(url_for('admin_services'))
         except Exception as e:
             db.session.rollback()
-            flash(f'Error adding service: {str(e)}', 'danger')
+            flash(f'Error Adding Service. Service Might Already Exists.', 'danger')
             return redirect(url_for('admin_services'))
             
     return render_template("add_service.html", categories=all_categories)
@@ -130,7 +130,7 @@ def add_service():
 
 @app.route("/")
 def home():
-    return render_template("base.html")
+    return render_template("home.html")
 
 
 #  ---------------------------- Service Routes --------------------------------------
@@ -148,7 +148,7 @@ def get_professionals_of_service(service_id):
         desired_professionals = Professional.query.filter_by(service_id=service.id, status="Active").all()
         if desired_professionals:
             return render_template("get_professionals_of_service.html", desired_professionals=desired_professionals, service=service)
-        flash('Currently, no professionals are available for this service', 'info')
+        flash('Currently, No Professionals Are Available For This Service', 'info')
         return redirect(url_for('services'))
     return redirect(url_for('home'))
 
@@ -163,10 +163,10 @@ def create_service_request(service_id, professional_id):
             service_request = ServiceRequest(service_id=service_id, customer_id=int(current_user.get_id()[2:]), professional_id=professional_id)
             db.session.add(service_request)
             db.session.commit()
-            flash(f'Your request has been created with Professional {professional.name}.\n Let the professional accept your service request 😀', 'success')
+            flash(f'Your Request Has Been Created With Professional {professional.name}.\n Let The Professional Accept Your Service Request 😀', 'success')
             return redirect(url_for('services'))
         return redirect(url_for('home'))
-    flash('Please login as a customer to book a service', 'danger')
+    flash('Please Login As A Customer To Book A Service', 'danger')
     return redirect(url_for('home'))
     
 
@@ -185,7 +185,7 @@ def get_services_of_category(category_id):
         available_services = category.services
         if available_services:
             return render_template('services.html', services=available_services, category=category.name)
-        flash("Currently, no service is available under this category", 'info')
+        flash("Currently, No Service Is Available Under This Category", 'info')
         return redirect(url_for('categories'))
     return redirect(url_for('home'))
     
@@ -235,7 +235,32 @@ def customer_dashboard():
     customer = Customer.query.filter_by(id=cust_id).first()
     return render_template('customer_dashboard.html', customer=customer, service_requests=customer.service_requests)
 
+
+@app.route('/customer-dashbaord/rate/<int:request_id>')
+@customer_login_required
+def rate_service(request_id):
+    return render_template('rating.html', request_id=request_id)
+
+@app.route('/customer-dashboard/close/<int:request_id>', methods=["GET", "POST"])
+@customer_login_required
+def close_request(request_id):
+    if request.method == "POST":
+        rating = request.form.get('rating')
         
+        existing_service_request = ServiceRequest.query.filter_by(id=request_id).first()
+        if not existing_service_request:
+            flash('Service Request Does Not Exist', 'danger')
+            return redirect(url_for('customer_dashboard'))
+
+        existing_service_request.rating = int(rating)
+        existing_service_request.status = "Closed"
+        db.session.commit()
+        return redirect(url_for('customer_dashboard'))
+    
+
+        
+            
+
 #  ------------------------ Registration Routes ----------------------------------
 
 @app.route('/professional-register', methods=['GET', 'POST'])
@@ -274,7 +299,7 @@ def customer_register():
         
         existing_customer = Customer.query.filter_by(email=email).first()
         if existing_customer:
-            flash('Email already registered. Please use different email address.', 'danger')
+            flash('Email Already Registered. Please Use Different Email Address.', 'danger')
             return redirect(url_for('customer_register'))
         
         new_customer = Customer(name=name, email=email)
@@ -283,7 +308,7 @@ def customer_register():
         db.session.add(new_customer)
         db.session.commit()
         
-        flash("Your account has been created. Book your first service now!", "success")
+        flash("Your Account Has Been Created. Book Your First Service Now!", "success")
         return redirect(url_for('home'))
         
     return render_template('customer_registration.html')
@@ -299,7 +324,7 @@ def professional_login():
         professional = Professional.query.filter_by(email=email).first()
         if professional and check_password_hash(professional.password, password):
             login_user(professional)
-            flash("You are now logged in!", "success")
+            flash("You Are Now Logged In!", "success")
             return redirect(url_for('home'))     
     return render_template('login.html', usertype="professional")
 
@@ -313,7 +338,7 @@ def customer_login():
         customer = Customer.query.filter_by(email=email).first()
         if customer and check_password_hash(customer.password, password):
             login_user(customer)
-            flash("You are now logged in!", "success")
+            flash("You Are Now Logged In!", "success")
             return redirect(url_for('home'))     
     return render_template('login.html', usertype="customer")
 
@@ -324,5 +349,5 @@ def customer_login():
 @login_required
 def logout():
     logout_user()
-    flash('You have been logged out.', 'info')
+    flash('You Have Been Logged Out.', 'info')
     return redirect(url_for('home'))
