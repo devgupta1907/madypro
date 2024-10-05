@@ -13,4 +13,34 @@
         </div>
     </div>
 
+    <div class="container mt-4">
+        <form action="{{ url_for('home') }}" method="GET" class="d-flex justify-content-center mb-4">
+            <input type="text" name="keyword" placeholder="Search for services..." class="form-control w-50" required>
+            <button type="submit" class="btn btn-primary ms-2">Search</button>
+        </form>
+    </div>
+
+    <div class="container mt-4"> 
+        <p class="lead">
+            Services | <a href="{{ url_for('services') }}" class="text-primary text-decoration-none" >See All >></a>
+        </p>
+        <div class="row">
+            {% for service in services[:3] %} <!-- Slice the services list to show only the first 3 -->
+            <div class="col-md-3 col-sm-6 mb-4">
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title">{{ service.name }}</h5>
+                        <p class="card-text">{{ service.price }}</p>
+
+                        <a href="{{ url_for('get_professionals_of_service', service_id=service.id) }}" class="btn btn-primary">Get Professionals</a>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+
+    
+    
+
 {% endblock %}

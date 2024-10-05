@@ -22,7 +22,7 @@
                     <div class="card-body">
                         <h5 class="card-title">{{ professional.name }}</h5>
                         <p class="card-text">{{ professional.service.name }}</p>
-                        <p class="card-text">{{ professional.service.price }}</p>
+                        <p class="card-text">Service Fee: &#8377;{{ professional.service_fee }}</p>
                         <a href="{{ url_for('create_service_request', service_id=professional.service_id, professional_id=professional.id) }}" class="btn btn-primary">Book Now</a>
                     </div>
                 </div>

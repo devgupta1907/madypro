@@ -130,7 +130,16 @@ def add_service():
 
 @app.route("/")
 def home():
-    return render_template("home.html")
+    keyword = request.args.get('keyword')
+    if keyword:
+        all_services = Service.query.filter(Service.name.ilike(f"%{keyword}%")).all()
+    else:
+        # Show the first 3 services if no search keyword is provided
+        all_services = Service.query.limit(3).all()
+
+    return render_template('home.html', services=all_services)
+    # all_services = Service.query.all()
+    # return render_template("home.html", services=all_services)
 
 
 #  ---------------------------- Service Routes --------------------------------------
@@ -270,14 +279,19 @@ def professional_register():
         email = request.form.get('professionalEmail')
         password = request.form.get('professionalPassword')
         service_id = request.form.get('professionalService')
+        service_fee = request.form.get('professionalFee')
 
         existing_professional = Professional.query.filter_by(email=email).first()
         if existing_professional:
             flash('Email Already Registered. Please Use A Different Email Address.', 'danger')
             return redirect(url_for('professional_register'))
 
-
-        new_professional = Professional(name=name, email=email, service_id=service_id)
+        service = Service.query.filter_by(id=service_id).first()
+        if int(service_fee) < int(service.price):
+            flash("Service Fee Must Be Greater Than Or Equals To Base Price", "danger")
+            return redirect(url_for("professional_register"))
+        
+        new_professional = Professional(name=name, email=email, service_id=service_id, service_fee=service_fee)
         new_professional.set_password(password)
 
         db.session.add(new_professional)
