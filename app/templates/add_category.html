@@ -2,12 +2,16 @@
 
 {% block content %}
 
+<div class="container mt-2">
+    <h3 class="text-center display-6 my-2">Add A Category</h3>
+</div>
+
+
 <div class="container mt-4">
     <div class="row justify-content-center">
         <div class="col-md-6">
             <form action="{{ url_for('add_category') }}" method="POST">
 
-                <!-- Category Name -->
                 <div class="mb-3">
                   <label for="categoryName" class="form-label">Category Name</label>
                   <input type="text" class="form-control" name="category_name" id="categoryName" aria-describedby="categoryHelp">
@@ -15,9 +19,26 @@
                   <div id="categoryHelp" class="form-text">The category name must be unique</div>
                 </div>
 
-                <button type="submit" class="btn btn-primary">Submit</button>
+                <button type="submit" class="btn btn-warning">Submit</button>
             </form>
         </div>
+    </div>
+</div>
+
+
+<div class="container mt-4">
+    <p class="lead">- found <b>{{ categories|length }}</b> category(s)</p>
+    <div class="row">
+        {% for category in categories %}
+        <div class="col-md-2 mb-4">
+            <div class="card border border-0">
+                <div class="card-body shadow rounded">
+                    <h5 class="card-title text-center">{{ category.name }}</h5>
+                    <p class="card-text">Services: {{category.services|length}}</p>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
     </div>
 </div>
 

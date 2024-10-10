@@ -1,4 +1,4 @@
-from flask import redirect, url_for, flash
+from flask import redirect, request, url_for, flash
 from flask_login import current_user
 from functools import wraps
 from app import db, login_manager
@@ -63,3 +63,14 @@ def customer_login_required(f):
         
         return f(*args, **kwargs)
     return decorated_function
+
+
+def get_search_results(model):
+    keyword = request.args.get('keyword')
+    result = model.query.filter(model.name.ilike(f"%{keyword}%")).all()
+    return result
+
+def search_by_name_and_email(model):
+    keyword = request.args.get('keyword')
+    result = model.query.filter((model.name.ilike(f"%{keyword}%")) | (model.email.ilike(f"%{keyword}%"))).all()
+    return result

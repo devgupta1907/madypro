@@ -13,21 +13,28 @@
     </div>
 
     <div class="container mt-4">
+        <form action="{{ url_for('services') }}" method="GET" class="d-flex justify-content-center mb-4">
+            <input type="text" name="keyword" placeholder="Search for service..." class="form-control w-50" required>
+            <button type="submit" class="btn btn-warning ms-2">Get Results</button>
+        </form>
+    </div> 
+
+    <div class="container mt-4">
         {% if not category %}
             {% set category = "All" %}
         {% endif %}
         <p class="lead">- found <b>{{ services|length }}</b> service(s) in <b>{{ category }}</b></p>
         <div class="row">
             {% for service in services %}
-            <!-- Card 1 -->
-            <div class="col-md-3 col-sm-6 mb-4">
-                <div class="card">
-                    <!-- <img src="service-image1.jpg" class="card-img-top" alt="Service 1"> -->
-                    <div class="card-body">
-                        <h5 class="card-title">{{ service.name }}</h5>
-                        <p class="card-text">Base Price: &#8377;{{service.price}}</p>
-                        <p class="card-text">{{service.description}}</p>
-                        <a href="{{ url_for('get_professionals_of_service', service_id=service.id) }}" class="btn btn-primary">Get Professionals</a>
+            <div class="col-md-3 mb-4">
+                <div class="card border border-0">
+                    <div class="card-body shadow rounded">
+                        <h5 class="card-title text-center">{{ service.name }}</h5>
+                        <p class="card-text text-center">Base Price: &#8377;{{service.price}}</p>
+                        <p class="card-text text-truncate">{{service.description.title()}}</p>
+                        <div class="text-center">
+                            <a href="{{ url_for('get_professionals_of_service', service_id=service.id) }}" class="btn btn-warning">Get Professionals</a>
+                        </div>
                     </div>
                 </div>
             </div>

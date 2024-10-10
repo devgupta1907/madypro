@@ -15,10 +15,8 @@
         <p class="lead">- found <b>{{ desired_professionals|length }}</b> professionals</p>
         <div class="row">
             {% for professional in desired_professionals %}
-            <!-- Card 1 -->
-            <div class="col-md-3 col-sm-6 mb-4">
+            <div class="col-md-3 mb-4">
                 <div class="card">
-                    <!-- <img src="service-image1.jpg" class="card-img-top" alt="Service 1"> -->
                     <div class="card-body">
                         <h5 class="card-title">{{ professional.name }}</h5>
                         <p class="card-text">{{ professional.service.name }}</p>

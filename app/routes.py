@@ -2,7 +2,7 @@ from flask import render_template, request, redirect, url_for, flash
 from flask_login import login_user, logout_user, current_user, login_required
 from werkzeug.security import check_password_hash
 from app import app, db, login_manager
-from app.utility import admin_login_required, professional_login_required, customer_login_required
+from app.utility import admin_login_required, professional_login_required, customer_login_required, get_search_results, search_by_name_and_email
 from app.models import Category, Service, ServiceRequest, Customer, Professional, Admin
 
 
@@ -12,12 +12,12 @@ from app.models import Category, Service, ServiceRequest, Customer, Professional
 @app.route("/admin-login", methods=["GET", "POST"])
 def admin_login():
     if request.method == "POST":
-        email = request.form.get("typeEmail")
-        password = request.form.get('typePassword')
+        email = request.form.get("Email")
+        password = request.form.get('Password')
         admin = Admin.query.filter_by(email=email).first()
         if admin and check_password_hash(admin.password, password):
             login_user(admin)
-            flash("You are now logged in!", "success")
+            flash(f"Welcome Back, {admin.name}!", "success")
             return redirect(url_for('admin_home'))   
         flash("Wrong Admin Email or Password", 'danger')  
     return render_template('login.html', usertype="admin")
@@ -33,6 +33,9 @@ def admin_home():
 @admin_login_required
 def admin_services():
     all_services = Service.query.all()
+    service_results = get_search_results(Service)
+    if service_results:
+        return render_template("services_admin.html", services=service_results)
     return render_template("services_admin.html", services=all_services)
 
 
@@ -40,6 +43,9 @@ def admin_services():
 @admin_login_required
 def admin_professionals():
     all_professionals = Professional.query.all()
+    professional_results = search_by_name_and_email(Professional)
+    if professional_results:
+        return render_template("professionals_admin.html", professionals=professional_results)
     return render_template("professionals_admin.html", professionals=all_professionals)
 
 
@@ -47,10 +53,13 @@ def admin_professionals():
 @admin_login_required
 def admin_customers():
     all_customers = Customer.query.all()
+    customer_results = search_by_name_and_email(Customer)
+    if customer_results:
+        return render_template("customers_admin.html", customers=customer_results)
     return render_template("customers_admin.html", customers=all_customers)
 
 
-@app.route('/admin/activate/<int:professional_id>', methods=['POST'])
+@app.route('/admin/professionals/<int:professional_id>/activate', methods=['POST'])
 @admin_login_required
 def activate_professional(professional_id):
     professional = Professional.query.get_or_404(professional_id)
@@ -59,7 +68,7 @@ def activate_professional(professional_id):
     return redirect(url_for('admin_professionals'))
 
 
-@app.route('/admin/deactivate/<int:professional_id>', methods=['POST'])
+@app.route('/admin/professionals/<int:professional_id>/deactivate', methods=['POST'])
 @admin_login_required
 def deactivate_professional(professional_id):
     professional = Professional.query.get_or_404(professional_id)
@@ -68,33 +77,24 @@ def deactivate_professional(professional_id):
     return redirect(url_for('admin_professionals'))
 
 
-@app.route('/admin/delete/<int:professional_id>', methods=['POST'])
-@admin_login_required
-def delete_professional(professional_id):
-    professional = Professional.query.get_or_404(professional_id)
-    db.session.delete(professional)
-    db.session.commit()
-    return redirect(url_for('admin_professionals'))
-
-
 @app.route("/admin/categories/add_category", methods=["GET", "POST"])
 @admin_login_required
 def add_category():
+    all_categories = Category.query.all()
     if request.method == "POST":
-        category_name = request.form["category_name"]
+        category_name = request.form.get("category_name")
+        
+        existing_category = Category.query.filter_by(name=category_name).first()
+        if existing_category:
+            flash(f'Error Adding Category. Category Already Exists.', 'danger')
+            return redirect(url_for('add_category'))
         
         new_category = Category(name=category_name)
-        
-        try:
-            db.session.add(new_category)
-            db.session.commit()
-            flash("Category added successfully!", "success")
-            return redirect(url_for('admin_services'))
-        except Exception as e:
-            db.session.rollback()
-            flash(f'Error Adding Category. Category Might Already Exists.', 'danger')
-            return redirect(url_for('admin_services'))
-    return render_template("add_category.html")
+        db.session.add(new_category)
+        db.session.commit()
+        flash("Category added successfully!", "success")
+        return redirect(url_for('add_category'))
+    return render_template("add_category.html", categories=all_categories)
 
 
 @app.route("/admin/services/add_service", methods=['GET', 'POST'])
@@ -102,44 +102,60 @@ def add_category():
 def add_service():
     all_categories = Category.query.all()
     if request.method == "POST":
-        service_name = request.form["serviceName"]
-        service_price = request.form["servicePrice"]
-        service_category = request.form["serviceCategory"]
-        service_description = request.form["serviceDescription"]
+        service_name = request.form.get("serviceName")
+        service_price = request.form.get("servicePrice")
+        service_category = request.form.get("serviceCategory")
+        service_description = request.form.get("serviceDescription")
         
+        existing_service = Service.query.filter_by(name=service_name).first()
+        if existing_service:
+            flash(f'Error Adding Service. service Already Exists.', 'danger')
+            return redirect(url_for('add_service'))
+            
         new_service = Service(name=service_name, 
                               price=service_price, 
                               description=service_description,
                               category_id=service_category)
-        
-        try:
-            db.session.add(new_service)
-            db.session.commit()
-            flash("Service Added Successfully!", "success")
-            return redirect(url_for('admin_services'))
-        except Exception as e:
-            db.session.rollback()
-            flash(f'Error Adding Service. Service Might Already Exists.', 'danger')
-            return redirect(url_for('admin_services'))
+        db.session.add(new_service)
+        db.session.commit()
+        flash("Service Added Successfully!", "success")
+        return redirect(url_for('admin_services'))
             
     return render_template("add_service.html", categories=all_categories)
 
+@app.route("/admin/services/update_service/<int:service_id>", methods=['GET', 'POST'])
+def update_service(service_id):
+    service = Service.query.filter_by(id = service_id).first()
+    if request.method == "POST":
+        service_name = request.form.get("serviceName")
+        service_price = request.form.get("servicePrice")
+        service_description = request.form.get("serviceDescription")
+        
+        existing_service = Service.query.filter(Service.name == service_name, 
+                                                Service.id != service_id).first()
+        if existing_service:
+            flash(f'A Service With This Name Already Exists. Please Choose Different Name', 'danger')
+            return redirect(url_for('update_service', service_id=service_id))
+        
+        service.name = service_name
+        service.price = service_price
+        service.description = service_description
+
+        db.session.commit()
+        flash("Service Updated Successfully!", "success")
+        return redirect(url_for('admin_services'))
+    return render_template("update_service.html", service=service)
+
 
 #  -----------------------------------------------------------------------------------   
-
-
+    
 @app.route("/")
 def home():
-    keyword = request.args.get('keyword')
-    if keyword:
-        all_services = Service.query.filter(Service.name.ilike(f"%{keyword}%")).all()
-    else:
-        # Show the first 3 services if no search keyword is provided
-        all_services = Service.query.limit(3).all()
-
+    all_services = Service.query.limit(3).all()
+    service_results = get_search_results(Service)
+    if service_results:
+        return render_template('home.html', services=service_results)
     return render_template('home.html', services=all_services)
-    # all_services = Service.query.all()
-    # return render_template("home.html", services=all_services)
 
 
 #  ---------------------------- Service Routes --------------------------------------
@@ -147,6 +163,9 @@ def home():
 @app.route("/services")
 def services():
     all_services = Service.query.all()
+    service_results = get_search_results(Service)
+    if service_results:
+        return render_template("services.html", services=service_results)
     return render_template("services.html", services=all_services)
 
 
@@ -184,7 +203,10 @@ def create_service_request(service_id, professional_id):
 @app.route('/categories')
 def categories():
     categories = Category.query.all()
-    return render_template('categories.html', categories=categories) 
+    category_results = get_search_results(Category)
+    if category_results:
+        return render_template('categories.html', categories=category_results)
+    return render_template('categories.html', categories=categories)
 
 
 @app.route('/categories/<int:category_id>/services')
@@ -279,7 +301,6 @@ def professional_register():
         email = request.form.get('professionalEmail')
         password = request.form.get('professionalPassword')
         service_id = request.form.get('professionalService')
-        service_fee = request.form.get('professionalFee')
 
         existing_professional = Professional.query.filter_by(email=email).first()
         if existing_professional:
@@ -287,11 +308,8 @@ def professional_register():
             return redirect(url_for('professional_register'))
 
         service = Service.query.filter_by(id=service_id).first()
-        if int(service_fee) < int(service.price):
-            flash("Service Fee Must Be Greater Than Or Equals To Base Price", "danger")
-            return redirect(url_for("professional_register"))
         
-        new_professional = Professional(name=name, email=email, service_id=service_id, service_fee=service_fee)
+        new_professional = Professional(name=name, email=email, service_id=service_id)
         new_professional.set_password(password)
 
         db.session.add(new_professional)
@@ -333,8 +351,8 @@ def customer_register():
 @app.route("/professional-login", methods=["GET", "POST"])
 def professional_login():
     if request.method == "POST":
-        email = request.form.get("typeEmail")
-        password = request.form.get('typePassword')
+        email = request.form.get("Email")
+        password = request.form.get('Password')
         professional = Professional.query.filter_by(email=email).first()
         if professional and check_password_hash(professional.password, password):
             login_user(professional)
@@ -346,8 +364,8 @@ def professional_login():
 @app.route("/customer-login", methods=["GET", "POST"])
 def customer_login():
     if request.method == "POST":
-        email = request.form.get("typeEmail")
-        password = request.form.get('typePassword')
+        email = request.form.get("Email")
+        password = request.form.get('Password')
         
         customer = Customer.query.filter_by(email=email).first()
         if customer and check_password_hash(customer.password, password):

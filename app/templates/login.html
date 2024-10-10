@@ -18,21 +18,21 @@
             <div class="col-md-6">
                 <form action="{{ url_for(usertype + '_login') }}" method="POST">
 
-                    <!-- Professional/Customer Email -->
                     <div class="mb-3">
-                        <label for="typeEmail" class="form-label">Email address</label>
-                        <input type="email" class="form-control" id="typeEmail" name="typeEmail" required>
+                        <label for="Email" class="form-label">Email address</label>
+                        <input type="email" class="form-control" id="Email" name="Email" required>
                         <div id="emailHelp" class="form-text">Your registered email address</div>
                     </div>
 
-                    <!-- Professional/Customer Password -->
                     <div class="mb-3">
-                        <label for="typePassword" class="form-label">Password</label>
-                        <input type="password" class="form-control" id="typePassword" name="typePassword" required>
+                        <label for="Password" class="form-label">Password</label>
+                        <input type="password" class="form-control" id="Password" name="Password" required>
                     </div>
 
+                    <div class="mb-3">
+                        <button type="submit" class="btn btn-warning">Log In</button>
+                    </div>
                     
-                    <button type="submit" class="btn btn-primary">Submit</button>
                 </form>
             </div>
         </div>

@@ -3,20 +3,29 @@
 {% block content %}
 
     <div class="d-flex justify-content-between align-items-center m-4">
-        <h3>Services</h3>
+        <h3 class="display-6 lead">Services</h3>
         <div>
-            <a href="{{ url_for('add_service') }}" class="btn btn-primary me-2">Add New Service</a>
-            <a href="{{ url_for('add_category') }}" class="btn btn-primary">Add New Service Category</a>
+            <a href="{{ url_for('add_service') }}" class="btn btn-warning me-2">Add New Service</a>
+            <a href="{{ url_for('add_category') }}" class="btn btn-warning">Add New Service Category</a>
         </div>
+    </div>
+
+    <div class="container mt-4">
+        <form action="{{ url_for('admin_services') }}" method="GET" class="d-flex justify-content-center mb-4">
+            <input type="text" name="keyword" placeholder="Search for service..." class="form-control w-50" required>
+            <button type="submit" class="btn btn-warning ms-2">Search</button>
+        </form>
     </div>
 
     <table class="table table-hover">
         <thead>
             <tr>
-                <th scope="col">#</th>
+                <th scope="col">S.No</th>
                 <th scope="col">Name</th>
-                <th scope="col">Price</th>
+                <th scope="col">Base Price (in &#8377;)</th>
                 <th scope="col">Category</th>
+                <th scope="col"># of Professionals</th>
+                <th>Action</th>
             </tr>
         </thead>
 
@@ -27,6 +36,14 @@
                 <td>{{ service.name }}</td>
                 <td>{{ service.price }}</td>
                 <td>{{ service.category.name }}</td>
+                <td>{{ service.professionals|length }}</td>
+                <td>
+                    <div class="d-inline">
+                        <form action="{{ url_for('update_service', service_id=service.id) }}" class="d-inline">
+                            <button type="submit" class="btn btn-info">Edit</button>
+                        </form>
+                    </div>
+                </td>
             </tr>
             {% endfor %}
         

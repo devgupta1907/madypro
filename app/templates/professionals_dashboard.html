@@ -48,7 +48,6 @@
       <td>
         <div class="d-inline">
           {% if request.status == "Requested" %}
-          <!-- Accept button -->
 			<form
 				action="{{ url_for('accept_request', request_id=request.id) }}"
 				method="POST"
@@ -56,7 +55,6 @@
 				<button type="submit" class="btn btn-success">Accept</button>
 			</form>
 
-          <!-- Reject button -->
 			<form
 				action="{{ url_for('reject_request', request_id=request.id) }}"
 				method="POST"
@@ -65,7 +63,6 @@
 			</form>
 
           {% elif request.status == "Accepted" %}
-          <!-- Reject button -->
 			<form
 				action="{{ url_for('reject_request', request_id=request.id) }}"
 				method="POST"
@@ -74,7 +71,6 @@
 			</form>
 
           {% elif request.status == "Rejected" %}
-          <!-- No buttons for rejected status -->
           	<span>No further actions available</span>
           {% endif %}
         </div>
