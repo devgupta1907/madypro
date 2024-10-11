@@ -42,6 +42,11 @@
                         <form action="{{ url_for('update_service', service_id=service.id) }}" class="d-inline">
                             <button type="submit" class="btn btn-info">Edit</button>
                         </form>
+                        {% if service.professionals|length == 0 %}
+                        <form action="{{ url_for('delete_service', service_id=service.id) }}" method="POST" class="d-inline">
+                            <button type="submit" class="btn btn-danger">Delete</button>
+                        </form>
+                        {% endif %}
                     </div>
                 </td>
             </tr>

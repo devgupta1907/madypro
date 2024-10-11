@@ -40,8 +40,10 @@
               <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
                 {% if current_user.get_id().startswith('c_') %} {% set user = 'customer' %}
                   Customer {{ current_user.name }}
-                {% else %} {% set user = 'professional' %}
+                {% elif current_user.get_id().startswith('p_') %} {% set user = 'professional' %}
                   Professional {{ current_user.name }}
+                {% else %} {% set user = 'admin' %}
+                  Admin {{ current_user.name }}
                 {% endif %}
               </a>
               <ul class="dropdown-menu" aria-labelledby="userDropdown">

@@ -18,7 +18,6 @@
             <div class="col-md-6">
                 <form action="{{ url_for('professional_register') }}" method="POST">
 
-                    <!-- Professional Name -->
                     <div class="mb-3">
                       <label for="professionalName" class="form-label">Your Name</label>
                       <input type="text" class="form-control" id="professionalName" name="professionalName" aria-describedby="nameHelp" required>
@@ -26,20 +25,17 @@
                       <div id="nameHelp" class="form-text">Please enter your full name here.</div>
                     </div>
 
-                    <!-- Professional Email -->
                     <div class="mb-3">
                         <label for="professionalEmail" class="form-label">Email address</label>
                         <input type="email" class="form-control" id="professionalEmail" name="professionalEmail" required>
                         <div id="emailHelp" class="form-text">This email will be required for login.</div>
                     </div>
 
-                    <!-- Professional Password -->
                     <div class="mb-3">
                         <label for="professionalPassword" class="form-label">Password</label>
                         <input type="password" class="form-control" id="professionalPassword" name="professionalPassword" required>
                     </div>
 
-                    <!-- Professional Service Category -->
                     <div class="mb-3">
                         <label for="professionalService" class="form-label">Your Service</label>
                         <select class="form-select" id="professionalService" name="professionalService" required>
@@ -50,7 +46,7 @@
                     </div>
                     
                     <div class="mb-3">
-                        <button type="submit" class="btn btn-primary">Submit</button>
+                        <button type="submit" class="btn btn-warning">Register</button>
                     </div>
                 </form>
             </div>

@@ -25,7 +25,7 @@ def admin_login():
 
 @app.route("/admin")
 @admin_login_required
-def admin_home():
+def admin_dashboard():
     return render_template("admin.html")
 
 
@@ -147,6 +147,22 @@ def update_service(service_id):
     return render_template("update_service.html", service=service)
 
 
+@app.route("/admin/services/delete_service/<int:service_id>", methods=['POST'])
+def delete_service(service_id):
+    service = Service.query.filter_by(id = service_id).first()
+    if request.method == "POST":
+        if len(service.professionals) == 0:
+            db.session.delete(service)
+            db.session.commit()
+            flash("Service Deleted Successfully", 'success')
+            return redirect(url_for('admin_services'))
+        flash("Service Cannot Be Deleted As It Has Associated Professionals", 'info')
+    return redirect(url_for('admin_services'))
+    
+    
+    
+    
+    
 #  -----------------------------------------------------------------------------------   
     
 @app.route("/")

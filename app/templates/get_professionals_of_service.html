@@ -1,6 +1,5 @@
 {% extends 'base.html' %}
 
-
 {% block content %}
 
     <div class="container mt-4">
@@ -11,17 +10,20 @@
             </div>
         </div>
     </div>
+
     <div class="container mt-4">
-        <p class="lead">- found <b>{{ desired_professionals|length }}</b> professionals</p>
+        <p class="lead">- found <b>{{ desired_professionals|length }}</b> professional(s)</p>
         <div class="row">
             {% for professional in desired_professionals %}
             <div class="col-md-3 mb-4">
-                <div class="card">
-                    <div class="card-body">
-                        <h5 class="card-title">{{ professional.name }}</h5>
-                        <p class="card-text">{{ professional.service.name }}</p>
-                        <p class="card-text">Service Fee: &#8377;{{ professional.service_fee }}</p>
-                        <a href="{{ url_for('create_service_request', service_id=professional.service_id, professional_id=professional.id) }}" class="btn btn-primary">Book Now</a>
+                <div class="card border border-0">
+                    <div class="card-body shadow rounded">
+                        <h5 class="card-title text-center">{{ professional.name }}</h5>
+                        <p class="card-text text-center">{{ professional.service.name }}</p>
+                        <p class="card-text text-center"> {{ "💛" * professional.rating|round|int }}</p>
+                        <div class="text-center">
+                            <a href="{{ url_for('create_service_request', service_id=professional.service_id, professional_id=professional.id) }}" class="btn btn-warning">Book Professional</a>
+                        </div>
                     </div>
                 </div>
             </div>
