@@ -2,7 +2,7 @@ from flask import render_template, request, redirect, url_for, flash
 from flask_login import login_user, logout_user, current_user, login_required
 from werkzeug.security import check_password_hash
 from app import app, db, login_manager
-from app.utility import admin_login_required, professional_login_required, customer_login_required, get_search_results, search_by_name_and_email
+from app.utility import admin_login_required, professional_login_required, customer_login_required, get_search_results, search_by_name_and_email, chart_for_professional_services, chart_for_category_services
 from app.models import Category, Service, ServiceRequest, Customer, Professional, Admin
 
 
@@ -18,7 +18,7 @@ def admin_login():
         if admin and check_password_hash(admin.password, password):
             login_user(admin)
             flash(f"Welcome Back, {admin.name}!", "success")
-            return redirect(url_for('admin_home'))   
+            return redirect(url_for('admin_dashboard'))   
         flash("Wrong Admin Email or Password", 'danger')  
     return render_template('login.html', usertype="admin")
 
@@ -26,7 +26,20 @@ def admin_login():
 @app.route("/admin")
 @admin_login_required
 def admin_dashboard():
-    return render_template("admin.html")
+    professionals_in_service_graph = chart_for_professional_services()
+    services_in_category_graph = chart_for_category_services()
+    
+    service_count = Service.query.count()
+    customer_count = Customer.query.count()
+    professional_count = Professional.query.filter_by(status="Active").count()
+    sr_closed_count = ServiceRequest.query.filter_by(status="Closed").count()
+    return render_template("admin_dashboard.html", 
+                           prof_chart=professionals_in_service_graph,
+                           service_chart=services_in_category_graph,
+                           service_count=service_count,
+                           customer_count=customer_count,
+                           professional_count=professional_count,
+                           sr_closed_count=sr_closed_count)
 
 
 @app.route("/admin/services")

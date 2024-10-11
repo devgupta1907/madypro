@@ -1,0 +1,68 @@
+{% extends 'admin.html' %}
+
+{% block content %}
+
+    <div class="container mt-2">
+        <h3 class="text-center display-6 my-2">MadyPro Admin Dashboard</h3>
+        <div class="row">
+            <div class="text-center">
+                <p class="lead">The Control Center of MadyPro Household Services Application</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="container mt-2">
+        <div class="row">
+            <div class="col-6">
+                <img src="{{ url_for('static', filename='graphs/' + prof_chart) }}" class="rounded border border-1 shadow" alt="{{ prof_chart }}" style="width: 100%;">
+            </div>
+    
+            <div class="col-6">
+                <img src="{{ url_for('static', filename='graphs/' + service_chart) }}" class="rounded border border-1 shadow" alt="{{ service_chart }}" style="width: 100%;">
+            </div>
+        </div>
+    </div>
+
+    <div class="container mt-4">
+        <div class="row">
+            <div class="col-md-3 mb-4">
+                <div class="card border border-0">
+                    <div class="card-body shadow rounded">
+                        <h5 class="card-title display-6 text-center">{{ service_count }}</h5>
+                        <p class="card-text text-center">Services</p>
+                    </div>
+                </div>
+            </div>
+    
+            <div class="col-md-3 mb-4">
+                <div class="card border border-0">
+                    <div class="card-body shadow rounded">
+                        <h5 class="card-title display-6 text-center">{{ customer_count }}</h5>
+                        <p class="card-text text-center">Customers</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-3 mb-4">
+                <div class="card border border-0">
+                    <div class="card-body shadow rounded">
+                        <h5 class="card-title display-6 text-center">{{ professional_count }}</h5>
+                        <p class="card-text text-center">Active Professionals</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-3 mb-4">
+                <div class="card border border-0">
+                    <div class="card-body shadow rounded">
+                        <h5 class="card-title display-6 text-center">{{ sr_closed_count }}</h5>
+                        <p class="card-text text-center">Closed Service Requests</p>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+        
+    </div>
+
+{% endblock %}

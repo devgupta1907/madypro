@@ -10,7 +10,7 @@ class Category(db.Model):
 
     def __repr__(self):
         return f"<Category {self.name}>"
-    
+        
 
 class Service(db.Model):
     id = db.Column(db.Integer, autoincrement=True, primary_key=True)
