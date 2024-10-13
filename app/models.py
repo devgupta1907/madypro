@@ -54,9 +54,6 @@ class Customer(UserMixin, db.Model):
             self.password = generate_password_hash(password)
         else:
             raise ValueError("Password cannot be None or empty")
-
-    def check_password(self, password):
-        return check_password_hash(self.password, password)
     
     
 class Professional(UserMixin, db.Model):
@@ -93,9 +90,6 @@ class Professional(UserMixin, db.Model):
             self.password = generate_password_hash(password)
         else:
             raise ValueError("Password cannot be None or empty")
-
-    def check_password(self, password):
-        return check_password_hash(self.password, password)
     
     
 class Admin(UserMixin, db.Model):

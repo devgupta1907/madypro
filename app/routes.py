@@ -1,8 +1,8 @@
 from flask import render_template, request, redirect, url_for, flash
 from flask_login import login_user, logout_user, current_user, login_required
 from werkzeug.security import check_password_hash
-from app import app, db, login_manager
-from app.utility import admin_login_required, professional_login_required, customer_login_required, get_search_results, search_by_name_and_email, chart_for_professional_services, chart_for_category_services
+from app import app, db
+from app.utility import admin_login_required, professional_login_required, customer_login_required, search_by_name, search_by_name_and_email, chart_for_professional_services, chart_for_category_services
 from app.models import Category, Service, ServiceRequest, Customer, Professional, Admin
 
 
@@ -46,7 +46,7 @@ def admin_dashboard():
 @admin_login_required
 def admin_services():
     all_services = Service.query.all()
-    service_results = get_search_results(Service)
+    service_results = search_by_name(Service)
     if service_results:
         return render_template("services_admin.html", services=service_results)
     return render_template("services_admin.html", services=all_services)
@@ -133,8 +133,8 @@ def add_service():
         db.session.commit()
         flash("Service Added Successfully!", "success")
         return redirect(url_for('admin_services'))
-            
     return render_template("add_service.html", categories=all_categories)
+
 
 @app.route("/admin/services/update_service/<int:service_id>", methods=['GET', 'POST'])
 def update_service(service_id):
@@ -153,8 +153,8 @@ def update_service(service_id):
         service.name = service_name
         service.price = service_price
         service.description = service_description
-
         db.session.commit()
+        
         flash("Service Updated Successfully!", "success")
         return redirect(url_for('admin_services'))
     return render_template("update_service.html", service=service)
@@ -173,15 +173,12 @@ def delete_service(service_id):
     return redirect(url_for('admin_services'))
     
     
-    
-    
-    
 #  -----------------------------------------------------------------------------------   
     
 @app.route("/")
 def home():
     all_services = Service.query.limit(3).all()
-    service_results = get_search_results(Service)
+    service_results = search_by_name(Service)
     if service_results:
         return render_template('home.html', services=service_results)
     return render_template('home.html', services=all_services)
@@ -192,13 +189,14 @@ def home():
 @app.route("/services")
 def services():
     all_services = Service.query.all()
-    service_results = get_search_results(Service)
+    service_results = search_by_name(Service)
     if service_results:
         return render_template("services.html", services=service_results)
     return render_template("services.html", services=all_services)
 
 
 @app.route("/services/<int:service_id>/professionals")
+@customer_login_required
 def get_professionals_of_service(service_id):
     service = Service.query.filter_by(id=service_id).first()
     if service:
@@ -210,29 +208,26 @@ def get_professionals_of_service(service_id):
     return redirect(url_for('home'))
 
 
-@app.route("/services/<int:service_id>/professionals/<int:professional_id>/create")
-@login_required
+@app.route("/services/<int:service_id>/professionals/<int:professional_id>/create", methods=['POST'])
+@customer_login_required
 def create_service_request(service_id, professional_id):
-    if current_user.get_id().startswith('c_'):
-        service = Service.query.filter_by(id=service_id).first()
-        professional = Professional.query.filter_by(id=professional_id).first()
-        if service and professional:
-            service_request = ServiceRequest(service_id=service_id, customer_id=int(current_user.get_id()[2:]), professional_id=professional_id)
-            db.session.add(service_request)
-            db.session.commit()
-            flash(f'Your Request Has Been Created With Professional {professional.name}.\n Let The Professional Accept Your Service Request 😀', 'success')
-            return redirect(url_for('services'))
-        return redirect(url_for('home'))
-    flash('Please Login As A Customer To Book A Service', 'danger')
+    service = Service.query.filter_by(id=service_id).first()
+    professional = Professional.query.filter_by(id=professional_id).first()
+    if service and professional:
+        service_request = ServiceRequest(service_id=service_id, customer_id=int(current_user.get_id()[2:]), professional_id=professional_id)
+        db.session.add(service_request)
+        db.session.commit()
+        flash(f'Your Request Has Been Created With Professional {professional.name}.\n Let The Professional Accept Your Service Request 😀', 'success')
+        return redirect(url_for('services'))
     return redirect(url_for('home'))
     
 
-# ----------------- Category Route -------------------------------------
+# ----------------- Category Routes -------------------------------------
 
 @app.route('/categories')
 def categories():
     categories = Category.query.all()
-    category_results = get_search_results(Category)
+    category_results = search_by_name(Category)
     if category_results:
         return render_template('categories.html', categories=category_results)
     return render_template('categories.html', categories=categories)
@@ -258,14 +253,14 @@ def get_services_of_category(category_id):
 def professional_dashboard():
     prof_id = int(current_user.get_id()[2:])
     professional = Professional.query.filter_by(id=prof_id).first()
-    return render_template('professionals_dashboard.html', professional = professional, 
-                           service_requests = professional.service_requests)
+    return render_template('professionals_dashboard.html', professional=professional, 
+                           service_requests=professional.service_requests)
 
 
 @app.route('/professional-dashboard/accept/<int:request_id>', methods=["POST"])
 @professional_login_required
 def accept_request(request_id):
-    service_request = ServiceRequest.query.filter_by(id = request_id).first()
+    service_request = ServiceRequest.query.filter_by(id=request_id).first()
     if service_request:
         service_request.status = "Accepted"
         db.session.commit()
@@ -277,7 +272,7 @@ def accept_request(request_id):
 @app.route('/professional-dashboard/reject/<int:request_id>', methods=["POST"])
 @professional_login_required
 def reject_request(request_id):
-    service_request = ServiceRequest.query.filter_by(id = request_id).first()
+    service_request = ServiceRequest.query.filter_by(id=request_id).first()
     if service_request:
         service_request.status = "Rejected"
         db.session.commit()
@@ -296,29 +291,29 @@ def customer_dashboard():
     return render_template('customer_dashboard.html', customer=customer, service_requests=customer.service_requests)
 
 
-@app.route('/customer-dashbaord/rate/<int:request_id>')
+@app.route('/customer-dashboard/rate/<int:request_id>')
 @customer_login_required
 def rate_service(request_id):
     return render_template('rating.html', request_id=request_id)
 
-@app.route('/customer-dashboard/close/<int:request_id>', methods=["GET", "POST"])
+
+@app.route('/customer-dashboard/close/<int:request_id>', methods=["POST"])
 @customer_login_required
 def close_request(request_id):
-    if request.method == "POST":
-        rating = request.form.get('rating')
-        
-        existing_service_request = ServiceRequest.query.filter_by(id=request_id).first()
-        if not existing_service_request:
-            flash('Service Request Does Not Exist', 'danger')
-            return redirect(url_for('customer_dashboard'))
-
-        existing_service_request.rating = int(rating)
-        existing_service_request.status = "Closed"
-        db.session.commit()
+    rating = request.form.get('rating')
+    
+    existing_service_request = ServiceRequest.query.filter_by(id=request_id).first()
+    if not existing_service_request:
+        flash('Service Request Does Not Exist', 'danger')
         return redirect(url_for('customer_dashboard'))
+
+    existing_service_request.rating = int(rating)
+    existing_service_request.status = "Closed"
+    db.session.commit()
+    flash('Service Request Closed. Thank You For Rating Our Service Professional', 'success')
+    return redirect(url_for('customer_dashboard'))
     
 
-        
             
 
 #  ------------------------ Registration Routes ----------------------------------

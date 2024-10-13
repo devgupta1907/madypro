@@ -44,7 +44,7 @@ def professional_login_required(f):
     @wraps(f)
     def decorated_function(*args, **kwargs):
         if not current_user.is_authenticated:
-            flash('Please Log As A Professional To Continue', 'warning')
+            flash('Please Log In As A Professional To Continue', 'warning')
             return redirect(url_for('professional_login'))
 
         if not current_user.get_id().startswith('p_'):
@@ -60,7 +60,7 @@ def customer_login_required(f):
     @wraps(f)
     def decorated_function(*args, **kwargs):
         if not current_user.is_authenticated:
-            flash('Please Log As A Customer To Continue', 'warning')
+            flash('Please Log in As A Customer To Continue', 'warning')
             return redirect(url_for('customer_login'))
 
         if not current_user.get_id().startswith('c_'):
@@ -71,7 +71,7 @@ def customer_login_required(f):
     return decorated_function
 
 
-def get_search_results(model):
+def search_by_name(model):
     keyword = request.args.get('keyword')
     result = model.query.filter(model.name.ilike(f"%{keyword}%")).all()
     return result
@@ -89,12 +89,14 @@ def num_of_prof_in_each_service():
         result[service.name] = len(service.professionals)
     return result
 
+
 def num_of_services_in_each_category():
     result = {}
     categories = Category.query.all()
     for category in categories:
         result[category.name] = len(category.services)
     return result
+
 
 def chart_for_category_services():
     result = num_of_services_in_each_category()
@@ -112,7 +114,6 @@ def chart_for_category_services():
     image_path = os.path.join('app', 'static', 'graphs', 'services_in_category.png')
     plt.savefig(image_path)
     return 'services_in_category.png'
-    
     
 
 def chart_for_professional_services():

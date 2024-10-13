@@ -22,7 +22,9 @@
                         <p class="card-text text-center">{{ professional.service.name }}</p>
                         <p class="card-text text-center"> {{ "💛" * professional.rating|round|int }}</p>
                         <div class="text-center">
-                            <a href="{{ url_for('create_service_request', service_id=professional.service_id, professional_id=professional.id) }}" class="btn btn-warning">Book Professional</a>
+                            <form action="{{ url_for('create_service_request', service_id=professional.service_id, professional_id=professional.id) }}" method="POST">
+                                <button type="submit" class="btn btn-warning">Book Professional</button>
+                            </form>
                         </div>
                     </div>
                 </div>
