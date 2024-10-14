@@ -20,8 +20,7 @@
 
                 <div class="mb-3">
                   <label for="customerName" class="form-label">Your Name</label>
-                  <input type="text" class="form-control" id="customerName" name="customerName" aria-describedby="nameHelp" required>
-                  
+                  <input type="text" class="form-control" id="customerName" name="customerName" required>
                   <div id="nameHelp" class="form-text">Please enter your full name here.</div>
                 </div>
 
@@ -29,6 +28,12 @@
                     <label for="customerEmail" class="form-label">Email address</label>
                     <input type="email" class="form-control" id="customerEmail" name="customerEmail" required>
                     <div id="emailHelp" class="form-text">This email will be required for login.</div>
+                </div>
+
+                <div class="mb-3">
+                    <label for="customerPincode" class="form-label">Pincode</label>
+                    <input type="number" class="form-control" id="customerPincode" name="customerPincode" min="110001" max="999999" required>
+                    <div id="pincodeHelp" class="form-text">Enter your valid six-digit pincode</div>
                 </div>
 
                 <div class="mb-3">

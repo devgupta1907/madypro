@@ -41,6 +41,7 @@ class Customer(UserMixin, db.Model):
     name = db.Column(db.String, unique=True, nullable=False)
     email = db.Column(db.String(120), unique=True, nullable=False)
     password = db.Column(db.String(60), nullable=False)
+    pincode = db.Column(db.Integer)
     service_requests = db.relationship('ServiceRequest', backref='customer', lazy=True)
     
     def get_id(self):

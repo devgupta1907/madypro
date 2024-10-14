@@ -2,7 +2,7 @@ from flask import render_template, request, redirect, url_for, flash
 from flask_login import login_user, logout_user, current_user, login_required
 from werkzeug.security import check_password_hash
 from app import app, db
-from app.utility import admin_login_required, professional_login_required, customer_login_required, search_by_name, search_by_name_and_email, chart_for_professional_services, chart_for_category_services
+from app.utility import admin_login_required, professional_login_required, customer_login_required, search_by_name, search_by_name_and_email, chart_for_professional_services, chart_for_category_services, validate_pincode
 from app.models import Category, Service, ServiceRequest, Customer, Professional, Admin
 
 
@@ -291,6 +291,30 @@ def customer_dashboard():
     return render_template('customer_dashboard.html', customer=customer, service_requests=customer.service_requests)
 
 
+@app.route('/customer-dashboard/update-profile', methods=["GET", "POST"])
+@customer_login_required
+def update_customer():
+    cust_id = int(current_user.get_id()[2:])
+    customer = Customer.query.filter_by(id=cust_id).first()
+    if request.method == "POST":
+        new_customer_name = request.form.get("customerName")
+        new_customer_pincode = int(request.form.get("customerPincode"))
+        
+        if validate_pincode(new_customer_pincode) is True:
+            customer.name = new_customer_name
+            customer.pincode = new_customer_pincode
+            db.session.commit()
+            flash("Details Updated Successfully", 'success')
+            return redirect(url_for('customer_dashboard'))
+        
+        elif validate_pincode(new_customer_pincode) is False:
+            flash("Invalid Pincode. Please Put Your Correct Pincode", 'danger')
+        else:
+            flash("Internal Issue Occurred! Please Try Again Later.", 'warning')
+            
+    return render_template('update_customer.html', customer=customer)
+
+
 @app.route('/customer-dashboard/rate/<int:request_id>')
 @customer_login_required
 def rate_service(request_id):
@@ -351,6 +375,7 @@ def customer_register():
     if request.method == "POST":
         name = request.form.get('customerName')
         email = request.form.get('customerEmail')
+        pincode = int(request.form.get('customerPincode'))
         password = request.form.get('customerPassword')
         
         existing_customer = Customer.query.filter_by(email=email).first()
@@ -358,14 +383,21 @@ def customer_register():
             flash('Email Already Registered. Please Use Different Email Address.', 'danger')
             return redirect(url_for('customer_register'))
         
-        new_customer = Customer(name=name, email=email)
-        new_customer.set_password(password)
+        if validate_pincode(pincode) is True:
+            new_customer = Customer(name=name, email=email, pincode=pincode)
+            new_customer.set_password(password)
         
-        db.session.add(new_customer)
-        db.session.commit()
+            db.session.add(new_customer)
+            db.session.commit()
         
-        flash("Your Account Has Been Created. Book Your First Service Now!", "success")
-        return redirect(url_for('home'))
+            flash("Your Account Has Been Created. Book Your First Service Now!", "success")
+            return redirect(url_for('home'))
+        
+        elif validate_pincode(pincode) is False:
+            flash("Invalid Pincode. Please Put Your Correct Pincode", 'danger')
+        else:
+            flash("Internal Issue Occurred! Please Try Again Later.", 'warning')
+        return redirect(url_for('customer_register'))
         
     return render_template('customer_registration.html')
 

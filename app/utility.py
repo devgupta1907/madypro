@@ -1,11 +1,10 @@
 from flask import redirect, request, url_for, flash
 from flask_login import current_user
+import requests
 import matplotlib
 matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 import os
-from io import BytesIO
-import base64
 from functools import wraps
 from app import db, login_manager
 from app.models import Customer, Professional, Admin, Service, Category
@@ -131,3 +130,15 @@ def chart_for_professional_services():
     plt.tight_layout()
     plt.savefig(image_path)
     return 'professionals_in_service.png'
+
+
+def validate_pincode(pincode):
+    try:
+        response = requests.get(f"https://api.postalpincode.in/pincode/{pincode}")
+        json_response = response.json()
+    
+        if json_response[0]["Status"] == "Success":
+            return True
+        return False
+    except Exception as e:
+        return None

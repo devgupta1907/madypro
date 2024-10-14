@@ -1,0 +1,48 @@
+{% extends 'base_registration.html' %}
+
+{% block title %}
+    <div class="container mt-4">
+        <h3 class="text-center display-5 my-2">Update Your Details</h3>
+        <div class="row">
+            <div class="text-center">
+                <p class="lead">Customer Profile</p>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block form %}
+
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <form action="{{ url_for('update_customer') }}" method="POST">
+
+                <div class="mb-3">
+                  <label for="customerName" class="form-label">Your Name</label>
+                  <input type="text" class="form-control" id="customerName" name="customerName" value="{{ customer.name }}" required>
+                  <div id="nameHelp" class="form-text">Please enter your full name here.</div>
+                </div>
+
+                <div class="mb-3">
+                    <label for="customerPincode" class="form-label">Pincode</label>
+                    <input type="number" class="form-control" id="customerPincode" name="customerPincode" value="{{ customer.pincode }}" min="110001" max="999999" required>
+                    <div id="pincodeHelp" class="form-text">Enter your valid six-digit pincode</div>
+                </div>
+
+                <div class="mb-3">
+                    <label for="customerEmail" class="form-label">Email address</label>
+                    <input type="email" class="form-control" id="customerEmail" name="customerEmail" value="{{ customer.email }}" disabled>
+                </div>
+                
+                <div class="mb-3">
+                    <button type="submit" class="btn btn-warning">Update</button>
+                </div>
+
+                
+            </form>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
