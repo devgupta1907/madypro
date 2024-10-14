@@ -41,7 +41,7 @@ class Customer(UserMixin, db.Model):
     name = db.Column(db.String, unique=True, nullable=False)
     email = db.Column(db.String(120), unique=True, nullable=False)
     password = db.Column(db.String(60), nullable=False)
-    pincode = db.Column(db.Integer)
+    pincode = db.Column(db.Integer, nullable=False)
     service_requests = db.relationship('ServiceRequest', backref='customer', lazy=True)
     
     def get_id(self):
@@ -62,6 +62,7 @@ class Professional(UserMixin, db.Model):
     name = db.Column(db.String, unique=True, nullable=False)
     email = db.Column(db.String(120), unique=True, nullable=False)
     password = db.Column(db.String, nullable=False)
+    work_exp = db.Column(db.Integer, nullable=False)
     service_id = db.Column(db.Integer, db.ForeignKey('service.id'), nullable=False)
     service_requests = db.relationship('ServiceRequest', backref='professional', lazy=True)
     status = db.Column(db.String, default="Pending")

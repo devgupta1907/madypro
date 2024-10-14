@@ -59,7 +59,7 @@ def customer_login_required(f):
     @wraps(f)
     def decorated_function(*args, **kwargs):
         if not current_user.is_authenticated:
-            flash('Please Log in As A Customer To Continue', 'warning')
+            flash('Please Log In As A Customer To Continue', 'warning')
             return redirect(url_for('customer_login'))
 
         if not current_user.get_id().startswith('c_'):

@@ -37,10 +37,16 @@
                     </div>
 
                     <div class="mb-3">
+                        <label for="professionalExp" class="form-label">Work Experience (in years)</label>
+                        <input type="number" class="form-control" id="professionalExp" name="professionalExp" min="0" max="40" required>
+                    </div>
+
+
+                    <div class="mb-3">
                         <label for="professionalService" class="form-label">Your Service</label>
                         <select class="form-select" id="professionalService" name="professionalService" required>
                             {% for service in services %}
-                                <option value="{{ service.id }}">{{ service.name }} | {{ service.price }}</option>
+                                <option value="{{ service.id }}">{{ service.name }} | &#8377;{{ service.price }}</option>
                             {% endfor %}
                         </select>
                     </div>

@@ -15,10 +15,12 @@
         </div>
     </div>
 
-    <table class="table table-hover">
+    <div class="container">
+      <p class="lead">- Booking History</p>
+      <table class="table table-hover">
         <thead>
           <tr>
-            <th scope="col">#</th>
+            <th scope="col">ID</th>
             <th scope="col">Professional Name</th>
             <th scope="col">Status</th>
             <th scope="col">Actions</th>
@@ -37,7 +39,7 @@
                   <form
                       action="{{ url_for('rate_service', request_id=request.id) }}"
                       class="d-inline">
-                      <button type="submit" class="btn btn-success">Close?</button>
+                      <button type="submit" class="btn btn-info">Close?</button>
                   </form>
      
                 {% else %}
@@ -50,5 +52,6 @@
           {% endfor %}
         </tbody>
       </table>
+    </div>
 
 {% endblock %}

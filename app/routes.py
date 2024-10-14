@@ -137,6 +137,7 @@ def add_service():
 
 
 @app.route("/admin/services/update_service/<int:service_id>", methods=['GET', 'POST'])
+@admin_login_required
 def update_service(service_id):
     service = Service.query.filter_by(id = service_id).first()
     if request.method == "POST":
@@ -161,6 +162,7 @@ def update_service(service_id):
 
 
 @app.route("/admin/services/delete_service/<int:service_id>", methods=['POST'])
+@admin_login_required
 def delete_service(service_id):
     service = Service.query.filter_by(id = service_id).first()
     if request.method == "POST":
@@ -348,6 +350,7 @@ def professional_register():
         name = request.form.get('professionalName')
         email = request.form.get('professionalEmail')
         password = request.form.get('professionalPassword')
+        work_exp = request.form.get('professionalExp')
         service_id = request.form.get('professionalService')
 
         existing_professional = Professional.query.filter_by(email=email).first()
@@ -357,7 +360,7 @@ def professional_register():
 
         service = Service.query.filter_by(id=service_id).first()
         
-        new_professional = Professional(name=name, email=email, service_id=service_id)
+        new_professional = Professional(name=name, email=email, work_exp=work_exp, service_id=service_id)
         new_professional.set_password(password)
 
         db.session.add(new_professional)

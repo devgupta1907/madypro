@@ -1,5 +1,9 @@
 {% extends 'admin.html' %}
 
+{% block title %}
+    Update Service
+{% endblock %}
+
 {% block content %}
 
     <div class="container mt-4">
@@ -15,7 +19,7 @@
 
                     <div class="mb-3">
                         <label for="servicePrice" class="form-label">Base Price (in &#8377;)</label>
-                        <input type="number" class="form-control" id="servicePrice" name="servicePrice" value="{{ service.price }}" min="10" step="10" required>
+                        <input type="number" class="form-control" id="servicePrice" name="servicePrice" value="{{ service.price }}" min="10" required>
                     </div>
 
                     <div class="mb-3">

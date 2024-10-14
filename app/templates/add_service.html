@@ -1,5 +1,10 @@
 {% extends 'admin.html' %}
 
+{% block title %}
+    Add Service
+{% endblock %}
+
+
 {% block content %}
 
     <div class="container mt-4">
@@ -9,13 +14,13 @@
 
                     <div class="mb-3">
                       <label for="serviceName" class="form-label">Service Name</label>
-                      <input type="text" class="form-control" id="serviceName" name="serviceName" aria-describedby="serviceHelp" required>
+                      <input type="text" class="form-control" id="serviceName" name="serviceName" required>
                       <div id="serviceHelp" class="form-text">The service name must be unique</div>
                     </div>
 
                     <div class="mb-3">
-                        <label for="servicePrice" class="form-label">Base Price</label>
-                        <input type="number" class="form-control" id="servicePrice" name="servicePrice" min="10" step="10" required>
+                        <label for="servicePrice" class="form-label">Base Price (in &#8377;)</label>
+                        <input type="number" class="form-control" id="servicePrice" name="servicePrice" min="10" required>
                     </div>
 
                     <div class="mb-3">
@@ -34,7 +39,7 @@
                     </div>
 
                     <div class="mb-3">
-                        <button type="submit" class="btn btn-primary">Submit</button>
+                        <button type="submit" class="btn btn-warning">Add Service</button>
                     </div>
                     
                 </form>
