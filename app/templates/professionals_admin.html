@@ -45,14 +45,14 @@
                         <td>{{ professional.work_exp }}</td>
                         <td>{{ professional.status }}</td>
                         <td>
-                            <div class="d-inline">
-                                {% if professional.status in ["Pending","InActive"] %}
-                                    <form action="{{ url_for('activate_professional', professional_id=professional.id) }}" method="POST" class="d-inline">
+                            <div>
+                                {% if professional.status in ["Pending","Blocked"] %}
+                                    <form action="{{ url_for('activate_professional', professional_id=professional.id) }}" method="POST">
                                         <button type="submit" class="btn btn-info">Activate</button>
                                     </form>
                                 {% elif professional.status == "Active" %}
-                                    <form action="{{ url_for('deactivate_professional', professional_id=professional.id) }}" method="POST" class="d-inline">
-                                        <button type="submit" class="btn btn-danger">Deactivate</button>
+                                    <form action="{{ url_for('block_professional', professional_id=professional.id) }}" method="POST">
+                                        <button type="submit" class="btn btn-danger">Block</button>
                                     </form>
                                 {% endif %}
                             </div>

@@ -1,84 +1,84 @@
-{% extends 'base.html' %} {% block content %}
+{% extends 'base.html' %} 
 
-<div class="container mt-4">
-  <h3 class="text-center display-6 my-2">{{ professional.name }}</h3>
-  <div class="row">
-    <div class="text-center">
-      <p class="lead">
-        {{ professional.service.name }} Professional | 
-		    <span class="badge 
-          {% if professional.status == 'Active' %}
-            text-bg-success
-          {% elif professional.status == 'Pending' %}
-            text-bg-warning
-          {% elif professional.status == 'InActive' %}
-            text-bg-danger
-          {% endif %}
-        "> {{ professional.status }} </span> |
-        <span class="badge 
-          {% if 0 <= professional.rating < 2.6 %}
-            text-bg-danger
-          {% elif 2.6 <= professional.rating < 4.1 %}
-            text-bg-warning
-          {% elif 4.1 <= professional.rating <= 5 %}
-            text-bg-success
-          {% endif %}
-        "> {{ professional.rating }} </span>
-      </p>
+{% block content %}
+
+  <div class="container mt-4">
+    <h3 class="text-center display-6 my-2">{{ professional.name }}</h3>
+    <div class="row">
+      <div class="text-center">
+        <p class="lead">
+          {{ professional.service.name }} Professional | 
+          <span class="badge 
+            {% if professional.status == 'Active' %}
+              text-bg-success
+            {% elif professional.status == 'Pending' %}
+              text-bg-warning
+            {% elif professional.status == 'InActive' %}
+              text-bg-danger
+            {% endif %}"> {{ professional.status }} 
+          </span> |
+          <span class="badge 
+            {% if professional.rating == 0 %}
+              text-bg-secondary
+            {% elif 0 < professional.rating < 2.6 %}
+              text-bg-danger
+            {% elif 2.6 <= professional.rating < 4.1 %}
+              text-bg-warning
+            {% elif 4.1 <= professional.rating <= 5 %}
+              text-bg-success
+            {% endif %}"> {{ professional.rating }} 
+          </span>
+        </p>
+      </div>
     </div>
   </div>
-</div>
 
-<table class="table table-hover">
-  <thead>
-    <tr>
-      <th scope="col">#</th>
-      <th scope="col">Customer Name</th>
-      <th scope="col">Status</th>
-      <th scope="col">Actions</th>
-    </tr>
-  </thead>
+  <div class="container">
+    <p class="lead">- Service Request History</p>
+    <table class="table table-hover">
+      <thead>
+        <tr>
+          <th scope="col">#</th>
+          <th scope="col">Customer Name</th>
+          <th scope="col">Status</th>
+          <th scope="col">Actions</th>
+        </tr>
+      </thead>
 
-  <tbody>
-    {% for request in service_requests %}
-    <tr>
-      <th scope="row">{{ request.id }}</th>
-      <td>{{ request.customer.name }}</td>
-      <td>{{ request.status }}</td>
-      <td>
-        <div class="d-inline">
-          {% if request.status == "Requested" %}
-			<form
-				action="{{ url_for('accept_request', request_id=request.id) }}"
-				method="POST"
-				class="d-inline">
-				<button type="submit" class="btn btn-info">Accept</button>
-			</form>
+      <tbody>
+        
+        {% for request in service_requests %}
+        <tr>
+          <th scope="row">{{ request.id }}</th>
+          <td>{{ request.customer.name }}</td>
+          <td>{{ request.status }}</td>
+          <td>
+            <div>
+              {% if request.status == "Requested" %}
+                <form action="{{ url_for('accept_request', request_id=request.id) }}" method="POST">
+                  <button type="submit" class="btn btn-info">Accept</button>
+                </form>
 
-			<form
-				action="{{ url_for('reject_request', request_id=request.id) }}"
-				method="POST"
-				class="d-inline">
-				<button type="submit" class="btn btn-danger">Reject</button>
-			</form>
+                <form action="{{ url_for('reject_request', request_id=request.id) }}" method="POST">
+                  <button type="submit" class="btn btn-danger">Reject</button>
+                </form>
 
-          {% elif request.status == "Accepted" %}
-			<form
-				action="{{ url_for('reject_request', request_id=request.id) }}"
-				method="POST"
-				class="d-inline">
-				<button type="submit" class="btn btn-danger">Reject</button>
-			</form>
+              {% elif request.status == "Accepted" %}
+                <form action="{{ url_for('reject_request', request_id=request.id) }}" method="POST">
+                  <button type="submit" class="btn btn-danger">Reject</button>
+                </form>
 
-          {% elif request.status == "Rejected" %}
-          	<span>No further actions available</span>
-          {% endif %}
-        </div>
-      </td>
-    </tr>
+              {% elif request.status == "Rejected" %}
+                <span>No further actions available</span>
+              {% endif %}
 
-    {% endfor %}
-  </tbody>
-</table>
+            </div>
+          </td>
+        </tr>
+        {% endfor %}
+
+      </tbody>
+    </table>
+  </div>
 
 {% endblock %}

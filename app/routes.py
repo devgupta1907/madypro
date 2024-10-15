@@ -72,6 +72,24 @@ def admin_customers():
     return render_template("customers_admin.html", customers=all_customers)
 
 
+@app.route('/admin/customer/<int:customer_id>/block', methods=['POST'])
+@admin_login_required
+def block_customer(customer_id):
+    customer = Customer.query.get_or_404(customer_id)
+    customer.status = "Blocked"
+    db.session.commit()
+    return redirect(url_for('admin_customers'))
+
+
+@app.route('/admin/customer/<int:customer_id>/unblock', methods=['POST'])
+@admin_login_required
+def unblock_customer(customer_id):
+    customer = Customer.query.get_or_404(customer_id)
+    customer.status = "Active"
+    db.session.commit()
+    return redirect(url_for('admin_customers'))
+
+
 @app.route('/admin/professionals/<int:professional_id>/activate', methods=['POST'])
 @admin_login_required
 def activate_professional(professional_id):
@@ -81,11 +99,11 @@ def activate_professional(professional_id):
     return redirect(url_for('admin_professionals'))
 
 
-@app.route('/admin/professionals/<int:professional_id>/deactivate', methods=['POST'])
+@app.route('/admin/professionals/<int:professional_id>/block', methods=['POST'])
 @admin_login_required
-def deactivate_professional(professional_id):
+def block_professional(professional_id):
     professional = Professional.query.get_or_404(professional_id)
-    professional.status = "InActive"
+    professional.status = "Blocked"
     db.session.commit()
     return redirect(url_for('admin_professionals'))
 
@@ -215,8 +233,9 @@ def get_professionals_of_service(service_id):
 def create_service_request(service_id, professional_id):
     service = Service.query.filter_by(id=service_id).first()
     professional = Professional.query.filter_by(id=professional_id).first()
+    customer_id = int(current_user.get_id()[2:])
     if service and professional:
-        service_request = ServiceRequest(service_id=service_id, customer_id=int(current_user.get_id()[2:]), professional_id=professional_id)
+        service_request = ServiceRequest(service_id=service_id, customer_id=customer_id, professional_id=professional_id)
         db.session.add(service_request)
         db.session.commit()
         flash(f'Your Request Has Been Created With Professional {professional.name}.\n Let The Professional Accept Your Service Request 😀', 'success')
@@ -414,9 +433,13 @@ def professional_login():
         password = request.form.get('Password')
         professional = Professional.query.filter_by(email=email).first()
         if professional and check_password_hash(professional.password, password):
+            if professional.status == "Blocked":
+                flash("Access Denied! You Are Blocked By The Admin", "danger")
+                return redirect(url_for('home'))
             login_user(professional)
             flash("You Are Now Logged In!", "success")
             return redirect(url_for('home'))     
+        flash("Error. Please Check Your Credentials ", "danger")
     return render_template('login.html', usertype="professional")
 
 
@@ -428,9 +451,13 @@ def customer_login():
         
         customer = Customer.query.filter_by(email=email).first()
         if customer and check_password_hash(customer.password, password):
+            if customer.status == "Blocked":
+                flash("Access Denied! You Are Blocked By The Admin", "danger")
+                return redirect(url_for('home'))
             login_user(customer)
             flash("You Are Now Logged In!", "success")
-            return redirect(url_for('home'))     
+            return redirect(url_for('home')) 
+        flash("Error. Please Check Your Credentials ", "danger")    
     return render_template('login.html', usertype="customer")
 
 

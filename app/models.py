@@ -23,6 +23,7 @@ class Service(db.Model):
     def __repr__(self):
         return f"<Service {self.name}>"
 
+
 class ServiceRequest(db.Model):
     id = db.Column(db.Integer, autoincrement=True, primary_key=True)
     service_id = db.Column(db.Integer, db.ForeignKey('service.id'), nullable=False)
@@ -30,7 +31,6 @@ class ServiceRequest(db.Model):
     professional_id = db.Column(db.Integer, db.ForeignKey('professional.id'), nullable=False)
     status = db.Column(db.String, default="Requested")
     rating = db.Column(db.Integer, CheckConstraint(sqltext='rating >= 1 AND rating <= 5'), nullable=True)
-
     
     def __repr__(self):
         return f"<ServiceRequest {self.id}>"
@@ -42,6 +42,7 @@ class Customer(UserMixin, db.Model):
     email = db.Column(db.String(120), unique=True, nullable=False)
     password = db.Column(db.String(60), nullable=False)
     pincode = db.Column(db.Integer, nullable=False)
+    status = db.Column(db.String, default="Active")
     service_requests = db.relationship('ServiceRequest', backref='customer', lazy=True)
     
     def get_id(self):
@@ -84,7 +85,7 @@ class Professional(UserMixin, db.Model):
             total_services += 1
             
         if total_services > 0: return total_ratings / total_services
-        return None
+        return 0
     
     
     def set_password(self, password):

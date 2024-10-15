@@ -62,9 +62,9 @@ def customer_login_required(f):
             flash('Please Log In As A Customer To Continue', 'warning')
             return redirect(url_for('customer_login'))
 
-        if not current_user.get_id().startswith('c_'):
+        elif not current_user.get_id().startswith('c_'):
             flash('Access Denied! You Are Not Allowed To Access This Page', 'danger')
-            return redirect(url_for('home'))
+            return redirect(url_for('home'))          
         
         return f(*args, **kwargs)
     return decorated_function

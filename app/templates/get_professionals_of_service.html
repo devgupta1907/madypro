@@ -20,7 +20,13 @@
                     <div class="card-body shadow rounded">
                         <h5 class="card-title text-center">{{ professional.name }}</h5>
                         <p class="card-text text-center">{{ professional.service.name }}</p>
-                        <p class="card-text text-center"> {{ "💛" * professional.rating|round|int }}</p>
+                        <p class="card-text text-center">
+                            {% if professional.rating == 0 %}
+                                Be the first to hire this professional
+                            {% else %}
+                                {{ "💛" * professional.rating|round|int }}
+                            {% endif %}
+                        </p>
                         <div class="text-center">
                             <form action="{{ url_for('create_service_request', service_id=professional.service_id, professional_id=professional.id) }}" method="POST">
                                 <button type="submit" class="btn btn-warning">Book Professional</button>
