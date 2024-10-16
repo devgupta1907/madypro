@@ -1,5 +1,7 @@
 {% extends 'base.html' %} 
 
+{% block pageTitle %} Customer Dashboard {% endblock %}
+
 {% block content %}
 
     <div class="container mt-4">
@@ -22,6 +24,7 @@
           <tr>
             <th scope="col">ID</th>
             <th scope="col">Professional Name</th>
+            <th scope="col">Service Name</th>
             <th scope="col">Status</th>
             <th scope="col">Actions</th>
           </tr>
@@ -32,13 +35,12 @@
           <tr>
             <th scope="row">{{ request.id }}</th>
             <td>{{ request.professional.name }}</td>
-            <td>{{ request.status }}</td>
+            <td>{{ request.service.name }}</td>
+            <td>{{ request.status.value }}</td>
             <td>
-              <div class="d-inline">
-                {% if request.status != "Closed" %}
-                  <form
-                      action="{{ url_for('rate_service', request_id=request.id) }}"
-                      class="d-inline">
+              <div>
+                {% if request.status != request_status.CLOSED %}
+                  <form action="{{ url_for('rate_service', request_id=request.id) }}">
                       <button type="submit" class="btn btn-info">Close?</button>
                   </form>
      

@@ -40,13 +40,13 @@
                         <td>{{ customer.service_requests|length }}</td>
                         <td>
                             <div>
-                                {% if customer.status == "Active" %}
+                                {% if customer.status == customer_status.ACTIVE %}
                                     <form action="{{ url_for('block_customer', customer_id=customer.id) }}" method="POST">
-                                        <button type="submit" class="btn btn-info">Block</button>
+                                        <button type="submit" class="btn btn-danger">Block</button>
                                     </form>
-                                {% elif customer.status == "Blocked" %}
+                                {% elif customer.status == customer_status.BLOCKED %}
                                     <form action="{{ url_for('unblock_customer', customer_id=customer.id) }}" method="POST">
-                                        <button type="submit" class="btn btn-danger">Unblock</button>
+                                        <button type="submit" class="btn btn-info">Unblock</button>
                                     </form>
                                 {% endif %}
                             </div>

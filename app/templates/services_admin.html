@@ -21,42 +21,44 @@
         </form>
     </div>
 
-    <table class="table table-hover">
-        <thead>
-            <tr>
-                <th scope="col">ID</th>
-                <th scope="col">Name</th>
-                <th scope="col">Base Price (in &#8377;)</th>
-                <th scope="col">Category</th>
-                <th scope="col"># of Professionals</th>
-                <th>Action</th>
-            </tr>
-        </thead>
+    <div class="container">
+        <table class="table table-hover">
+            <thead>
+                <tr>
+                    <th scope="col">ID</th>
+                    <th scope="col">Name</th>
+                    <th scope="col">Base Price (in &#8377;)</th>
+                    <th scope="col">Category</th>
+                    <th scope="col"># of Professionals</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
 
-        <tbody>
-            {% for service in services %}
-            <tr>
-                <th scope="row">{{ service.id }}</th>
-                <td>{{ service.name }}</td>
-                <td>{{ service.price }}</td>
-                <td>{{ service.category.name }}</td>
-                <td>{{ service.professionals|length }}</td>
-                <td>
-                    <div class="d-inline">
-                        <form action="{{ url_for('update_service', service_id=service.id) }}" class="d-inline">
-                            <button type="submit" class="btn btn-info">Edit</button>
-                        </form>
-                        {% if service.professionals|length == 0 %}
-                        <form action="{{ url_for('delete_service', service_id=service.id) }}" method="POST" class="d-inline">
-                            <button type="submit" class="btn btn-danger">Delete</button>
-                        </form>
-                        {% endif %}
-                    </div>
-                </td>
-            </tr>
-            {% endfor %}
-        
-        </tbody>
-    </table>
+            <tbody>
+                {% for service in services %}
+                <tr>
+                    <th scope="row">{{ service.id }}</th>
+                    <td>{{ service.name }}</td>
+                    <td>{{ service.price }}</td>
+                    <td>{{ service.category.name }}</td>
+                    <td>{{ service.professionals|length }}</td>
+                    <td>
+                        <div>
+                            <form action="{{ url_for('update_service', service_id=service.id) }}" class="d-inline">
+                                <button type="submit" class="btn btn-info">Edit</button>
+                            </form>
+                            {% if service.professionals|length == 0 %}
+                            <form action="{{ url_for('delete_service', service_id=service.id) }}" method="POST" class="d-inline">
+                                <button type="submit" class="btn btn-danger">Delete</button>
+                            </form>
+                            {% endif %}
+                        </div>
+                    </td>
+                </tr>
+                {% endfor %}
+            
+            </tbody>
+        </table>
+    </div>
 
 {% endblock %}

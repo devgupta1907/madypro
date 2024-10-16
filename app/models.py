@@ -2,6 +2,8 @@ from sqlalchemy import CheckConstraint
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask_login import UserMixin
 from app import db
+from app.enums import CustomerStatus, ProfessionalStatus, ServiceRequestStatus
+
 
 class Category(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -19,6 +21,7 @@ class Service(db.Model):
     description = db.Column(db.Text)
     category_id = db.Column(db.Integer, db.ForeignKey('category.id'), nullable=False)
     professionals = db.relationship('Professional', backref='service', lazy=True)
+    service_requests = db.relationship('ServiceRequest', backref='service', lazy=True)
     
     def __repr__(self):
         return f"<Service {self.name}>"
@@ -29,7 +32,7 @@ class ServiceRequest(db.Model):
     service_id = db.Column(db.Integer, db.ForeignKey('service.id'), nullable=False)
     customer_id = db.Column(db.Integer, db.ForeignKey('customer.id'), nullable=False)
     professional_id = db.Column(db.Integer, db.ForeignKey('professional.id'), nullable=False)
-    status = db.Column(db.String, default="Requested")
+    status = db.Column(db.Enum(ServiceRequestStatus), default=ServiceRequestStatus.REQUESTED, nullable=False)
     rating = db.Column(db.Integer, CheckConstraint(sqltext='rating >= 1 AND rating <= 5'), nullable=True)
     
     def __repr__(self):
@@ -42,7 +45,7 @@ class Customer(UserMixin, db.Model):
     email = db.Column(db.String(120), unique=True, nullable=False)
     password = db.Column(db.String(60), nullable=False)
     pincode = db.Column(db.Integer, nullable=False)
-    status = db.Column(db.String, default="Active")
+    status = db.Column(db.Enum(CustomerStatus), default=CustomerStatus.ACTIVE, nullable=False)
     service_requests = db.relationship('ServiceRequest', backref='customer', lazy=True)
     
     def get_id(self):
@@ -66,7 +69,7 @@ class Professional(UserMixin, db.Model):
     work_exp = db.Column(db.Integer, nullable=False)
     service_id = db.Column(db.Integer, db.ForeignKey('service.id'), nullable=False)
     service_requests = db.relationship('ServiceRequest', backref='professional', lazy=True)
-    status = db.Column(db.String, default="Pending")
+    status = db.Column(db.Enum(ProfessionalStatus), default=ProfessionalStatus.PENDING, nullable=False)
     
     
     def get_id(self):

@@ -6,17 +6,15 @@
     <h3 class="text-center display-6 my-2">{{ professional.name }}</h3>
     <div class="row">
       <div class="text-center">
-        <p class="lead">
-          {{ professional.service.name }} Professional | 
-          <span class="badge 
-            {% if professional.status == 'Active' %}
-              text-bg-success
-            {% elif professional.status == 'Pending' %}
-              text-bg-warning
-            {% elif professional.status == 'InActive' %}
-              text-bg-danger
-            {% endif %}"> {{ professional.status }} 
-          </span> |
+        <p class="lead">{{ professional.service.name }} Professional |
+          {% if professional.status == professional_status.ACTIVE %}
+            {% set spanClass = "text-bg-success" %} 
+          {% elif professional.status == professional_status.PENDING %}
+            {% set spanClass = "text-bg-warning" %}
+          {% elif professional.status == professional_status.BLOCKED %}
+            {% set spanClass = "text-bg-danger" %}
+          {% endif %}
+          <span class="badge {{ spanClass }}">{{ professional.status.value }}</span> |
           <span class="badge 
             {% if professional.rating == 0 %}
               text-bg-secondary
@@ -51,24 +49,24 @@
         <tr>
           <th scope="row">{{ request.id }}</th>
           <td>{{ request.customer.name }}</td>
-          <td>{{ request.status }}</td>
+          <td>{{ request.status.value }}</td>
           <td>
             <div>
-              {% if request.status == "Requested" %}
-                <form action="{{ url_for('accept_request', request_id=request.id) }}" method="POST">
+              {% if request.status == request_status.REQUESTED %}
+                <form action="{{ url_for('accept_request', request_id=request.id) }}" method="POST" class="d-inline">
                   <button type="submit" class="btn btn-info">Accept</button>
                 </form>
 
-                <form action="{{ url_for('reject_request', request_id=request.id) }}" method="POST">
+                <form action="{{ url_for('reject_request', request_id=request.id) }}" method="POST" class="d-inline">
                   <button type="submit" class="btn btn-danger">Reject</button>
                 </form>
 
-              {% elif request.status == "Accepted" %}
-                <form action="{{ url_for('reject_request', request_id=request.id) }}" method="POST">
+              {% elif request.status == request_status.ACCEPTED %}
+                <form action="{{ url_for('reject_request', request_id=request.id) }}" method="POST" class="d-inline">
                   <button type="submit" class="btn btn-danger">Reject</button>
                 </form>
 
-              {% elif request.status == "Rejected" %}
+              {% else %}
                 <span>No further actions available</span>
               {% endif %}
 
