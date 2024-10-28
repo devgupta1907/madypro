@@ -1,4 +1,3 @@
-from sqlalchemy import CheckConstraint
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask_login import UserMixin
 from app import db
@@ -33,7 +32,7 @@ class ServiceRequest(db.Model):
     customer_id = db.Column(db.Integer, db.ForeignKey('customer.id'), nullable=False)
     professional_id = db.Column(db.Integer, db.ForeignKey('professional.id'), nullable=False)
     status = db.Column(db.Enum(ServiceRequestStatus), default=ServiceRequestStatus.REQUESTED, nullable=False)
-    rating = db.Column(db.Integer, CheckConstraint(sqltext='rating >= 1 AND rating <= 5'), nullable=True)
+    rating = db.Column(db.Integer, nullable=True)
     
     def __repr__(self):
         return f"<ServiceRequest {self.id}>"
@@ -67,6 +66,7 @@ class Professional(UserMixin, db.Model):
     email = db.Column(db.String(120), unique=True, nullable=False)
     password = db.Column(db.String, nullable=False)
     work_exp = db.Column(db.Integer, nullable=False)
+    resume = db.Column(db.String, nullable=False)
     service_id = db.Column(db.Integer, db.ForeignKey('service.id'), nullable=False)
     service_requests = db.relationship('ServiceRequest', backref='professional', lazy=True)
     status = db.Column(db.Enum(ProfessionalStatus), default=ProfessionalStatus.PENDING, nullable=False)

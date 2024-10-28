@@ -6,7 +6,7 @@ matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 import os
 from functools import wraps
-from app import db, login_manager
+from app import db, login_manager, ALLOWED_EXTENSIONS
 from app.models import Customer, Professional, Admin, Service, Category
 
 
@@ -68,6 +68,11 @@ def customer_login_required(f):
         
         return f(*args, **kwargs)
     return decorated_function
+
+
+
+def allowed_file(filename):
+    return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
 
 def search_by_name(model):

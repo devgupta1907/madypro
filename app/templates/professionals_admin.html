@@ -29,6 +29,7 @@
                     <th scope="col">Service</th>
                     <th scope="col">Rating</th>
                     <th scope="col">Work Experience</th>
+                    <th scope="col">Resume</th>
                     <th scope="col">Status</th>
                     <th scope="col">Actions</th>
                 </tr>
@@ -43,6 +44,7 @@
                         <td>{{ professional.service.name }}</td>
                         <td>{{ professional.rating }}</td>
                         <td>{{ professional.work_exp }}</td>
+                        <td><a href="{{ url_for('get_professional_resume', filename=professional.resume) }}" target="_blank">🗄</a></td>
                         <td>{{ professional.status.value }}</td>
                         <td>
                             <div>

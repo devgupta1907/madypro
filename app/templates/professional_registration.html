@@ -13,16 +13,16 @@
 
 {% block form %}
 
-    <div class="container mt-5">
+    <div class="container mt-3">
         <div class="row justify-content-center">
             <div class="col-md-6">
-                <form action="{{ url_for('professional_register') }}" method="POST">
+                <form action="{{ url_for('professional_register') }}" method="POST" enctype="multipart/form-data">
 
                     <div class="mb-3">
-                      <label for="professionalName" class="form-label">Your Name</label>
-                      <input type="text" class="form-control" id="professionalName" name="professionalName" aria-describedby="nameHelp" required>
+                        <label for="professionalName" class="form-label">Your Name</label>
+                        <input type="text" class="form-control" id="professionalName" name="professionalName" required>
                       
-                      <div id="nameHelp" class="form-text">Please enter your full name here.</div>
+                    	<div id="nameHelp" class="form-text">Please enter your full name here.</div>
                     </div>
 
                     <div class="mb-3">
@@ -39,6 +39,11 @@
                     <div class="mb-3">
                         <label for="professionalExp" class="form-label">Work Experience (in years)</label>
                         <input type="number" class="form-control" id="professionalExp" name="professionalExp" min="0" max="40" required>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="professionalResume" class="form-label">Resume</label>
+                        <input type="file" class="form-control" id="professionalResume" name="professionalResume" accept="application/pdf" required>
                     </div>
 
 

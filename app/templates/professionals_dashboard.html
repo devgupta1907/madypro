@@ -3,10 +3,14 @@
 {% block content %}
 
   <div class="container mt-4">
-    <h3 class="text-center display-6 my-2">{{ professional.name }}</h3>
+    <h3 class="text-center display-6 my-2">{{ professional.name }}
+      <!-- <a class="fs-3 link-underline link-underline-opacity-0" href="{{ url_for('get_professional_resume', filename=professional.resume) }}">📄</a> -->
+    </h3>
     <div class="row">
       <div class="text-center">
-        <p class="lead">{{ professional.service.name }} Professional |
+        <p class="lead">{{ professional.service.name }} Professional </p>
+        <p class="lead">
+          <a href="{{ url_for('get_professional_resume', filename=professional.resume) }}" class="btn badge text-bg-primary" target="_blank">See Your Resume</a> |
           {% if professional.status == professional_status.ACTIVE %}
             {% set spanClass = "text-bg-success" %} 
           {% elif professional.status == professional_status.PENDING %}
@@ -14,18 +18,17 @@
           {% elif professional.status == professional_status.BLOCKED %}
             {% set spanClass = "text-bg-danger" %}
           {% endif %}
-          <span class="badge {{ spanClass }}">{{ professional.status.value }}</span> |
-          <span class="badge 
-            {% if professional.rating == 0 %}
-              text-bg-secondary
-            {% elif 0 < professional.rating < 2.6 %}
-              text-bg-danger
-            {% elif 2.6 <= professional.rating < 4.1 %}
-              text-bg-warning
-            {% elif 4.1 <= professional.rating <= 5 %}
-              text-bg-success
-            {% endif %}"> {{ professional.rating }} 
-          </span>
+          <span class="badge {{ spanClass }}">Status - {{ professional.status.value }} </span> |
+          {% if professional.rating == 0 %}
+            {% set badgeClass = "text-bg-secondary" %}
+          {% elif 0 < professional.rating < 2.6 %}
+            {% set badgeClass = "text-bg-danger" %}
+          {% elif 2.6 <= professional.rating < 4.1 %}
+            {% set badgeClass = "text-bg-warning" %}
+          {% elif 4.1 <= professional.rating <= 5 %}
+            {% set badgeClass = "text-bg-success" %}
+          {% endif %}
+          <span class="badge {{ badgeClass }}">Rating {{ professional.rating }} </span>
         </p>
       </div>
     </div>

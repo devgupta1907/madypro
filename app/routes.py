@@ -1,8 +1,13 @@
-from flask import render_template, request, redirect, url_for, flash
+from flask import render_template, request, redirect, url_for, flash, send_from_directory
 from flask_login import login_user, logout_user, current_user, login_required
 from werkzeug.security import check_password_hash
+from werkzeug.utils import secure_filename
 from app import app, db
-from app.utility import admin_login_required, professional_login_required, customer_login_required, search_by_name, search_by_name_and_email, chart_for_professional_services, chart_for_category_services, validate_pincode
+import os
+from app.utility import admin_login_required, professional_login_required, customer_login_required
+from .utility import search_by_name, search_by_name_and_email
+from .utility import chart_for_professional_services, chart_for_category_services
+from .utility import validate_pincode, allowed_file
 from app.models import Category, Service, ServiceRequest, Customer, Professional, Admin
 from app.enums import CustomerStatus, ProfessionalStatus, ServiceRequestStatus
 
@@ -67,6 +72,10 @@ def admin_professionals():
                            professionals=all_professionals,
                            professional_status=ProfessionalStatus)
 
+
+@app.route("/static/resume/<filename>")
+def get_professional_resume(filename):
+    return send_from_directory(app.config["RESUME_FOLDER"], filename)
 
 @app.route('/admin/customers')
 @admin_login_required
@@ -396,16 +405,25 @@ def professional_register():
         email = request.form.get('professionalEmail')
         password = request.form.get('professionalPassword')
         work_exp = request.form.get('professionalExp')
+        resume = request.files['professionalResume']
         service_id = request.form.get('professionalService')
-
+        
         existing_professional = Professional.query.filter_by(email=email).first()
         if existing_professional:
             flash('Email Already Registered. Please Use A Different Email Address.', 'danger')
             return redirect(url_for('professional_register'))
         
+        resume_filename = None
+        if resume and allowed_file(resume.filename):
+            resume_filename = secure_filename(resume.filename)
+            resume_filename = f"{email}_resume.pdf"
+            resume.save(os.path.join(app.config['RESUME_FOLDER'], resume_filename))
+        
+        print("MYFILENAME ", resume_filename)
         new_professional = Professional(name=name, 
                                         email=email, 
-                                        work_exp=work_exp, 
+                                        work_exp=work_exp,
+                                        resume=resume_filename,
                                         service_id=service_id)
         new_professional.set_password(password)
 
