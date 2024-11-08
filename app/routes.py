@@ -144,8 +144,30 @@ def add_category():
         db.session.commit()
         flash("Category added successfully!", "success")
         return redirect(url_for('add_category'))
-    return render_template("add_category.html", categories=all_categories)
+    return render_template("add_category.html", 
+                           categories=all_categories,
+                           update=False)
 
+@app.route("/admin/categories/update_category/<int:category_id>", methods=["GET", "POST"])
+@admin_login_required
+def update_category(category_id):
+    category = Category.query.filter_by(id=category_id).first()
+    if request.method == "POST":
+        category_name = request.form.get("category_name")
+        
+        existing_category = Category.query.filter(Category.id != category_id, Category.name == category_name).first()
+        if existing_category:
+            flash(f'Error Adding Category. Category Already Exists.', 'danger')
+            return redirect(url_for('add_category'))
+        
+        category.name = category_name
+        db.session.commit()
+        flash("Category updated successfully!", "success")
+        return redirect(url_for('add_category'))
+    return render_template("add_category.html",
+                           category=category,
+                           update=True)
+            
 
 @app.route("/admin/services/add_service", methods=['GET', 'POST'])
 @admin_login_required
@@ -387,10 +409,15 @@ def close_request(request_id):
         flash('Service Request Does Not Exist', 'danger')
         return redirect(url_for('customer_dashboard'))
 
-    existing_service_request.rating = int(rating)
-    existing_service_request.status = ServiceRequestStatus.CLOSED
-    db.session.commit()
-    flash('Service Request Closed. Thank You For Rating Our Service Professional', 'success')
+    if existing_service_request.status == ServiceRequestStatus.REQUESTED:
+        flash("The request is in REQUESTED state. Please wait till the further update 🙂", "info")
+    elif existing_service_request.status == ServiceRequestStatus.REJECTED:
+        flash('The professional did not accept this request. It is now closed. Please book your service with other professional. Incovenience is regretted 😔', 'info')
+    else:
+        existing_service_request.rating = int(rating)
+        existing_service_request.status = ServiceRequestStatus.CLOSED
+        db.session.commit()
+        flash('Service Request Closed. Thank You For Rating Our Service Professional', 'success')
     return redirect(url_for('customer_dashboard'))
     
 

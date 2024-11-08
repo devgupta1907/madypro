@@ -14,17 +14,31 @@
 <div class="container mt-4">
     <div class="row justify-content-center">
         <div class="col-md-6">
-            <form action="{{ url_for('add_category') }}" method="POST">
+            {% if update %}
+                <form action="{{ url_for('update_category', category_id=category.id) }}" method="POST">
 
-                <div class="mb-3">
-                  <label for="categoryName" class="form-label">Category Name</label>
-                  <input type="text" class="form-control" name="category_name" id="categoryName" aria-describedby="categoryHelp">
-                  
-                  <div id="categoryHelp" class="form-text">The category name must be unique</div>
-                </div>
+                    <div class="mb-3">
+                        <label for="categoryName" class="form-label">Category Name</label>
+                        <input type="text" class="form-control" name="category_name" id="categoryName" value="{{ category.name }}">
+                        
+                        <div class="form-text">The category name must be unique</div>
+                    </div>
 
-                <button type="submit" class="btn btn-warning">Submit</button>
-            </form>
+                    <button type="submit" class="btn btn-warning">Update Category</button>
+                </form>
+            {% else %}
+                <form action="{{ url_for('add_category') }}" method="POST">
+
+                    <div class="mb-3">
+                        <label for="categoryName" class="form-label">Category Name</label>
+                        <input type="text" class="form-control" name="category_name" id="categoryName">
+                        
+                        <div class="form-text">The category name must be unique</div>
+                    </div>
+
+                    <button type="submit" class="btn btn-warning">Add Category</button>
+                </form>
+            {% endif %}
         </div>
     </div>
 </div>
@@ -38,7 +52,12 @@
             <div class="card border border-0">
                 <div class="card-body shadow rounded">
                     <h5 class="card-title text-center">{{ category.name }}</h5>
-                    <p class="card-text">Services: {{category.services|length}}</p>
+                    <p class="card-text">Services: {{category.services|length}} </p>
+                    <div class="text-center">
+                        <form action="{{ url_for('update_category', category_id=category.id) }}" method="get">
+                            <button type="submit" class="btn btn-light">🖊</button>
+                        </form>
+                    </div>
                 </div>
             </div>
         </div>
