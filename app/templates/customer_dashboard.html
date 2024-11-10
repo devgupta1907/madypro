@@ -39,7 +39,7 @@
             <td>{{ request.status.value }}</td>
             <td>
               <div>
-                {% if request.status != request_status.CLOSED %}
+                {% if request.status not in [request_status.CLOSED, request_status.REJECTED]  %}
                   <form action="{{ url_for('rate_service', request_id=request.id) }}">
                       <button type="submit" class="btn btn-info">Close?</button>
                   </form>

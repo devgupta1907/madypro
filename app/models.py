@@ -40,7 +40,7 @@ class ServiceRequest(db.Model):
     
 class Customer(UserMixin, db.Model):
     id = db.Column(db.Integer, autoincrement=True, primary_key=True)
-    name = db.Column(db.String, unique=True, nullable=False)
+    name = db.Column(db.String, nullable=False)
     email = db.Column(db.String(120), unique=True, nullable=False)
     password = db.Column(db.String(60), nullable=False)
     pincode = db.Column(db.Integer, nullable=False)
@@ -62,7 +62,7 @@ class Customer(UserMixin, db.Model):
     
 class Professional(UserMixin, db.Model):
     id = db.Column(db.Integer, autoincrement=True, primary_key=True)
-    name = db.Column(db.String, unique=True, nullable=False)
+    name = db.Column(db.String, nullable=False)
     email = db.Column(db.String(120), unique=True, nullable=False)
     password = db.Column(db.String, nullable=False)
     work_exp = db.Column(db.Integer, nullable=False)
@@ -83,11 +83,12 @@ class Professional(UserMixin, db.Model):
         total_services = 0
         total_ratings = 0
         for request in self.service_requests:
-            if request.rating is not None: 
+            if request.rating is not None and request.status != ServiceRequestStatus.REQUESTED:
                 total_ratings += request.rating
-            total_services += 1
-            
-        if total_services > 0: return total_ratings / total_services
+                total_services += 1
+                
+        if total_services > 0:
+            return total_ratings / total_services
         return 0
     
     
