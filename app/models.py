@@ -88,7 +88,7 @@ class Professional(UserMixin, db.Model):
                 total_services += 1
                 
         if total_services > 0:
-            return total_ratings / total_services
+            return round(total_ratings / total_services, 1)
         return 0
     
     
