@@ -29,4 +29,3 @@ Develop a multi-user application where the customers can book services offered b
 - Run `run.py` file: <br>
 `python run.py`
 
-
